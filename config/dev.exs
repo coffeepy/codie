@@ -17,10 +17,12 @@ config :codie, Codie.Repo,
 config :codie, CodieWeb.Endpoint,
   # Binding to loopback ipv4 address prevents access from other machines.
   # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
-  http: [ip: {127, 0, 0, 1}],
+  http: [ip: {127, 0, 0, 1}, port: 0],
   check_origin: false,
   code_reloader: true,
   debug_errors: true,
+  log_access_url: false,
+  runtime_access_url: true,
   secret_key_base: "qmZFiqEs+8dMaLC09nuHm/gtD5dxgd3USTjjh79RBkJsmnJ5hu7Ce9s52bCLezc+",
   watchers: [
     esbuild: {Esbuild, :install_and_run, [:codie, ~w(--sourcemap=inline --watch)]},

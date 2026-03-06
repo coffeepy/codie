@@ -54,8 +54,9 @@ defmodule CodieWeb.LessonLiveTest do
 
     assert eventually(fn ->
              html = render(view)
+
              html =~ "Lesson cleared" and html =~ "Linked Next Lessons" and
-             html =~ "Next: String Blend"
+               html =~ "Next: String Blend"
            end)
   end
 

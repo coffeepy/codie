@@ -580,11 +580,13 @@ defmodule Codie.RunnerTest do
         lesson_slug: "functions-modules-pipe-roundup",
         code: """
         defmodule CodiePlayground.Format do
+          @suffix "!"
           def trimmed(text), do: String.trim(text)
           def loud(text), do: String.upcase(text)
+          def suffix, do: @suffix
         end
 
-        finish = fn text -> text <> "!" end
+        finish = fn text -> text <> CodiePlayground.Format.suffix() end
 
         " latte "
         |> CodiePlayground.Format.trimmed()

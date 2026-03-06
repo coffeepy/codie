@@ -7,17 +7,18 @@ defmodule Codie.Application do
 
   @impl true
   def start(_type, _args) do
-    children = [
-      CodieWeb.Telemetry,
-      Codie.Repo,
-      {Ecto.Migrator,
-       repos: Application.fetch_env!(:codie, :ecto_repos), skip: skip_migrations?()},
-      {DNSCluster, query: Application.get_env(:codie, :dns_cluster_query) || :ignore},
-      {Phoenix.PubSub, name: Codie.PubSub},
-      {Task.Supervisor, name: Codie.Runner.TaskSupervisor},
-      # Start to serve requests, typically the last entry
-      CodieWeb.Endpoint
-    ]
+    children =
+      [
+        CodieWeb.Telemetry,
+        Codie.Repo,
+        {Ecto.Migrator,
+         repos: Application.fetch_env!(:codie, :ecto_repos), skip: skip_migrations?()},
+        {DNSCluster, query: Application.get_env(:codie, :dns_cluster_query) || :ignore},
+        {Phoenix.PubSub, name: Codie.PubSub},
+        {Task.Supervisor, name: Codie.Runner.TaskSupervisor},
+        # Start to serve requests, typically the last entry
+        CodieWeb.Endpoint
+      ] ++ runtime_access_url_children()
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
@@ -36,5 +37,13 @@ defmodule Codie.Application do
   defp skip_migrations?() do
     # By default, sqlite migrations are run when using a release
     System.get_env("RELEASE_NAME") == nil
+  end
+
+  defp runtime_access_url_children() do
+    if Application.get_env(:codie, CodieWeb.Endpoint, [])[:runtime_access_url] do
+      [CodieWeb.DevAccessUrlLogger]
+    else
+      []
+    end
   end
 end
