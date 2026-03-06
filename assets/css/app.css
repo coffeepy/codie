@@ -1,0 +1,701 @@
+/* See the Tailwind configuration guide for advanced usage
+   https://tailwindcss.com/docs/configuration */
+
+@import "tailwindcss" source(none);
+@source "../css";
+@source "../js";
+@source "../../lib/codie_web";
+
+/* A Tailwind plugin that makes "hero-#{ICON}" classes available.
+   The heroicons installation itself is managed by your mix.exs */
+@plugin "../vendor/heroicons";
+
+/* daisyUI Tailwind Plugin. You can update this file by fetching the latest version with:
+   curl -sLO https://github.com/saadeghi/daisyui/releases/latest/download/daisyui.js
+   Make sure to look at the daisyUI changelog: https://daisyui.com/docs/changelog/ */
+@plugin "../vendor/daisyui" {
+  themes: false;
+}
+
+/* daisyUI theme plugin. You can update this file by fetching the latest version with:
+  curl -sLO https://github.com/saadeghi/daisyui/releases/latest/download/daisyui-theme.js
+  We ship with two themes, a light one inspired on Phoenix colors and a dark one inspired
+  on Elixir colors. Build your own at: https://daisyui.com/theme-generator/ */
+@plugin "../vendor/daisyui-theme" {
+  name: "dark";
+  default: false;
+  prefersdark: true;
+  color-scheme: "dark";
+  --color-base-100: oklch(30.33% 0.016 252.42);
+  --color-base-200: oklch(25.26% 0.014 253.1);
+  --color-base-300: oklch(20.15% 0.012 254.09);
+  --color-base-content: oklch(97.807% 0.029 256.847);
+  --color-primary: oklch(58% 0.233 277.117);
+  --color-primary-content: oklch(96% 0.018 272.314);
+  --color-secondary: oklch(58% 0.233 277.117);
+  --color-secondary-content: oklch(96% 0.018 272.314);
+  --color-accent: oklch(60% 0.25 292.717);
+  --color-accent-content: oklch(96% 0.016 293.756);
+  --color-neutral: oklch(37% 0.044 257.287);
+  --color-neutral-content: oklch(98% 0.003 247.858);
+  --color-info: oklch(58% 0.158 241.966);
+  --color-info-content: oklch(97% 0.013 236.62);
+  --color-success: oklch(60% 0.118 184.704);
+  --color-success-content: oklch(98% 0.014 180.72);
+  --color-warning: oklch(66% 0.179 58.318);
+  --color-warning-content: oklch(98% 0.022 95.277);
+  --color-error: oklch(58% 0.253 17.585);
+  --color-error-content: oklch(96% 0.015 12.422);
+  --radius-selector: 0.25rem;
+  --radius-field: 0.25rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.21875rem;
+  --size-field: 0.21875rem;
+  --border: 1.5px;
+  --depth: 1;
+  --noise: 0;
+}
+
+@plugin "../vendor/daisyui-theme" {
+  name: "light";
+  default: true;
+  prefersdark: false;
+  color-scheme: "light";
+  --color-base-100: oklch(98% 0 0);
+  --color-base-200: oklch(96% 0.001 286.375);
+  --color-base-300: oklch(92% 0.004 286.32);
+  --color-base-content: oklch(21% 0.006 285.885);
+  --color-primary: oklch(70% 0.213 47.604);
+  --color-primary-content: oklch(98% 0.016 73.684);
+  --color-secondary: oklch(55% 0.027 264.364);
+  --color-secondary-content: oklch(98% 0.002 247.839);
+  --color-accent: oklch(0% 0 0);
+  --color-accent-content: oklch(100% 0 0);
+  --color-neutral: oklch(44% 0.017 285.786);
+  --color-neutral-content: oklch(98% 0 0);
+  --color-info: oklch(62% 0.214 259.815);
+  --color-info-content: oklch(97% 0.014 254.604);
+  --color-success: oklch(70% 0.14 182.503);
+  --color-success-content: oklch(98% 0.014 180.72);
+  --color-warning: oklch(66% 0.179 58.318);
+  --color-warning-content: oklch(98% 0.022 95.277);
+  --color-error: oklch(58% 0.253 17.585);
+  --color-error-content: oklch(96% 0.015 12.422);
+  --radius-selector: 0.25rem;
+  --radius-field: 0.25rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.21875rem;
+  --size-field: 0.21875rem;
+  --border: 1.5px;
+  --depth: 1;
+  --noise: 0;
+}
+
+/* Add variants based on LiveView classes */
+@custom-variant phx-click-loading (.phx-click-loading&, .phx-click-loading &);
+@custom-variant phx-submit-loading (.phx-submit-loading&, .phx-submit-loading &);
+@custom-variant phx-change-loading (.phx-change-loading&, .phx-change-loading &);
+
+/* Make LiveView wrapper divs transparent for layout */
+[data-phx-session], [data-phx-teleported-src] { display: contents }
+
+/* This file is for your main application CSS */
+
+:root {
+  --bg-deep: #1b1615;
+  --bg-panel: rgba(39, 31, 29, 0.82);
+  --bg-panel-strong: rgba(52, 41, 38, 0.9);
+  --line-soft: rgba(255, 233, 213, 0.14);
+  --copy: #f8ece3;
+  --muted: #c4b3a5;
+  --accent: #df8f3f;
+  --accent-2: #85b8ff;
+  --accent-3: #6cd1b0;
+  --danger: #ff8d7f;
+  --shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+  background:
+    radial-gradient(circle at top right, rgba(223, 143, 63, 0.18), transparent 40%),
+    radial-gradient(circle at 10% 20%, rgba(133, 184, 255, 0.16), transparent 32%),
+    linear-gradient(180deg, #241c1a 0%, #171211 45%, #120f0e 100%);
+  color: var(--copy);
+}
+
+body.app-body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "IBM Plex Sans", "Avenir Next", "Segoe UI", sans-serif;
+  color: var(--copy);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+textarea {
+  font: inherit;
+}
+
+.site-shell {
+  min-height: 100vh;
+  padding: 1.25rem;
+}
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 auto 1.25rem;
+  max-width: 1200px;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 1.5rem;
+  background: rgba(30, 23, 21, 0.7);
+  backdrop-filter: blur(18px);
+  box-shadow: var(--shadow);
+}
+
+.brand-mark {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.brand-mark strong,
+.section-heading h1,
+.section-heading h2,
+.section-heading h3,
+.hero-copy h1,
+.track-hero h1 {
+  font-family: "Avenir Next Condensed", "DIN Condensed", "Oswald", sans-serif;
+  letter-spacing: 0.03em;
+}
+
+.brand-mark small {
+  display: block;
+  color: var(--muted);
+}
+
+.brand-orb {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--accent), #f4d782);
+  box-shadow: 0 0 22px rgba(223, 143, 63, 0.7);
+}
+
+.nav-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.nav-links a {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.nav-links a:hover {
+  color: var(--copy);
+}
+
+.page-shell {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.glass-panel {
+  border: 1px solid var(--line-soft);
+  border-radius: 1.5rem;
+  padding: 1.35rem;
+  background: linear-gradient(180deg, rgba(43, 34, 31, 0.84), rgba(24, 20, 19, 0.86));
+  backdrop-filter: blur(18px);
+  box-shadow: var(--shadow);
+}
+
+.hero-grid,
+.dashboard-grid,
+.profile-grid,
+.lesson-shell,
+.codex-grid,
+.track-grid {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.hero-grid {
+  grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.75fr);
+}
+
+.dashboard-grid,
+.profile-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.lesson-shell {
+  grid-template-columns: minmax(290px, 0.88fr) minmax(0, 1.12fr);
+  align-items: start;
+}
+
+.track-grid,
+.codex-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.eyebrow {
+  margin: 0 0 0.35rem;
+  color: var(--accent);
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.hero-copy h1,
+.track-hero h1,
+.lesson-brief h1 {
+  margin: 0;
+  font-size: clamp(2.6rem, 6vw, 4.8rem);
+  line-height: 0.95;
+}
+
+.hero-text,
+.muted-copy {
+  color: var(--muted);
+}
+
+.hero-actions,
+.editor-actions,
+.mission-meta,
+.track-hero-meta,
+.node-topline,
+.editor-topline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.hero-actions {
+  margin-top: 1.25rem;
+}
+
+.primary-cta,
+.secondary-cta,
+.danger-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0.7rem 1rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+
+.primary-cta {
+  background: linear-gradient(135deg, var(--accent), #f4d782);
+  color: #2d1906;
+  font-weight: 700;
+}
+
+.secondary-cta {
+  border-color: rgba(255, 233, 213, 0.18);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--copy);
+}
+
+.danger-cta {
+  border-color: rgba(255, 141, 127, 0.28);
+  background: rgba(255, 141, 127, 0.1);
+  color: #ffd7d1;
+}
+
+.primary-cta:hover,
+.secondary-cta:hover,
+.danger-cta:hover {
+  transform: translateY(-1px);
+}
+
+.primary-cta[disabled],
+.secondary-cta[disabled],
+.danger-cta[disabled] {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.codie-card {
+  display: grid;
+  gap: 1rem;
+}
+
+.codie-avatar {
+  position: relative;
+  width: 5.5rem;
+  height: 5.5rem;
+  border-radius: 1.75rem;
+  background: radial-gradient(circle at 30% 30%, #5f4537, #241917);
+  border: 1px solid var(--line-soft);
+}
+
+.codie-head {
+  position: absolute;
+  inset: 22% 24%;
+  border-radius: 1.2rem;
+  background: linear-gradient(180deg, #ffe9d5, #d1b499);
+}
+
+.codie-steam {
+  position: absolute;
+  top: -0.85rem;
+  left: 50%;
+  width: 1.8rem;
+  height: 1.4rem;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.38), transparent 70%);
+  animation: drift 2.6s ease-in-out infinite;
+}
+
+@keyframes drift {
+  0%, 100% { transform: translateX(-50%) translateY(0); opacity: 0.55; }
+  50% { transform: translateX(-50%) translateY(-0.25rem); opacity: 1; }
+}
+
+.codie-subtitle {
+  margin: 0.25rem 0 0;
+  color: var(--muted);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.stat-card {
+  padding: 0.9rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 233, 213, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.stat-card span:first-child {
+  display: block;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.stat-card strong {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 1.35rem;
+}
+
+.meter {
+  height: 0.45rem;
+  margin-top: 0.7rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.meter span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent-3), var(--accent));
+}
+
+.section-heading h1,
+.section-heading h2,
+.section-heading h3,
+.track-row strong,
+.lesson-node h3,
+.attempt-row strong,
+.reward-banner h3 {
+  margin: 0;
+}
+
+.track-stack,
+.attempt-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.track-row,
+.attempt-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.8rem 0.95rem;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.track-row p,
+.attempt-row p,
+.mission-panel p,
+.lesson-node p {
+  margin: 0.2rem 0 0;
+  color: var(--muted);
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.status-passed {
+  color: #d9fff2;
+  background: rgba(108, 209, 176, 0.14);
+  border-color: rgba(108, 209, 176, 0.28);
+}
+
+.status-available,
+.status-progress {
+  color: #fff4d9;
+  background: rgba(223, 143, 63, 0.14);
+  border-color: rgba(223, 143, 63, 0.28);
+}
+
+.status-locked {
+  color: #dbcfc5;
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.09);
+}
+
+.mini-code,
+.lesson-copy,
+.runner-log,
+.code-textarea {
+  margin: 0;
+  border-radius: 1.1rem;
+  border: 1px solid rgba(255, 233, 213, 0.1);
+  background: rgba(15, 11, 10, 0.72);
+  color: #f8ece3;
+  font-family: "Iosevka", "IBM Plex Mono", "SFMono-Regular", monospace;
+  line-height: 1.55;
+}
+
+.mini-code,
+.lesson-copy,
+.runner-log {
+  padding: 1rem;
+  white-space: pre-wrap;
+}
+
+.lesson-brief,
+.editor-panel {
+  position: sticky;
+  top: 1rem;
+}
+
+.editor-shell {
+  display: grid;
+  gap: 1rem;
+}
+
+.code-editor-frame {
+  position: relative;
+}
+
+.code-editor-frame.is-focused .code-editor-surface {
+  border-color: rgba(223, 143, 63, 0.4);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02), 0 0 0 1px rgba(223, 143, 63, 0.18);
+}
+
+.editor-sync-input {
+  position: absolute;
+  inset: auto auto auto -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.code-editor-surface {
+  min-height: 420px;
+  border-radius: 1.1rem;
+  overflow: hidden;
+  border: 1px solid rgba(255, 233, 213, 0.1);
+  background: rgba(15, 11, 10, 0.72);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+
+.vim-status-bar {
+  min-height: 2rem;
+  margin-top: 0.7rem;
+  padding: 0.45rem 0.7rem;
+  border-radius: 0.85rem;
+  border: 1px solid rgba(255, 233, 213, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--muted);
+  font-family: "Iosevka", "IBM Plex Mono", "SFMono-Regular", monospace;
+  font-size: 0.85rem;
+  white-space: pre-wrap;
+}
+
+.result-card,
+.reward-banner,
+.hints-card {
+  padding: 1rem;
+  border-radius: 1.15rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.checkpoint-list {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.quick-terms-list {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.quick-term-card {
+  border-radius: 0.95rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.025);
+  padding: 0.8rem 0.9rem;
+}
+
+.quick-term-card summary {
+  cursor: pointer;
+  font-weight: 650;
+  color: var(--copy);
+}
+
+.quick-term-card p {
+  margin: 0.6rem 0 0;
+  color: var(--muted);
+}
+
+.checkpoint-line,
+.hint-line {
+  margin: 0;
+  color: var(--copy);
+}
+
+.checkpoint-line::before {
+  content: "• ";
+  color: var(--accent);
+}
+
+.result-pass {
+  border-color: rgba(108, 209, 176, 0.32);
+  background: rgba(108, 209, 176, 0.08);
+}
+
+.result-warn {
+  border-color: rgba(223, 143, 63, 0.3);
+  background: rgba(223, 143, 63, 0.08);
+}
+
+.result-danger {
+  border-color: rgba(255, 141, 127, 0.35);
+  background: rgba(255, 141, 127, 0.08);
+}
+
+.reward-banner {
+  display: grid;
+  gap: 0.75rem;
+  border-color: rgba(133, 184, 255, 0.28);
+  background: linear-gradient(135deg, rgba(133, 184, 255, 0.12), rgba(108, 209, 176, 0.1));
+}
+
+.track-grid .lesson-node {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.lesson-node {
+  border: 1px solid var(--line-soft);
+  border-radius: 1.4rem;
+  padding: 1.1rem;
+  background: linear-gradient(180deg, rgba(43, 34, 31, 0.84), rgba(22, 18, 17, 0.88));
+}
+
+.lesson-node.locked {
+  opacity: 0.72;
+}
+
+.node-index {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  font-weight: 700;
+}
+
+.codex-entry {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.codex-detail {
+  display: grid;
+  gap: 0.2rem;
+  margin-top: 0.35rem;
+}
+
+.codex-detail pre {
+  margin: 0;
+  padding: 0.7rem 0.85rem;
+  border-radius: 0.9rem;
+  background: rgba(10, 16, 24, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  overflow-x: auto;
+}
+
+.codex-detail code {
+  font-size: 0.9rem;
+}
+
+@media (max-width: 980px) {
+  .hero-grid,
+  .dashboard-grid,
+  .profile-grid,
+  .lesson-shell,
+  .track-grid,
+  .codex-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .lesson-brief,
+  .editor-panel {
+    position: static;
+  }
+
+  .site-nav {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
