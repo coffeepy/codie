@@ -6,17 +6,40 @@ defmodule Codie.CurriculumTest do
   test "track titles reflect the rebuilt foundations plan" do
     tracks = Curriculum.list_tracks()
 
-    assert Enum.any?(tracks, &(&1.slug == "foundations" and &1.title == "Foundations: Data Types and Immutability"))
+    assert Enum.any?(
+             tracks,
+             &(&1.slug == "foundations" and &1.title == "Foundations: Data Types and Immutability")
+           )
 
-    assert Enum.any?(tracks, &(&1.slug == "foundations-pattern-matching" and &1.title == "Foundations: Pattern Matching"))
+    assert Enum.any?(
+             tracks,
+             &(&1.slug == "foundations-pattern-matching" and
+                 &1.title == "Foundations: Pattern Matching")
+           )
 
-    assert Enum.any?(tracks, &(&1.slug == "foundations-complex-data-structures" and &1.title == "Foundations: Complex Data Structures"))
+    assert Enum.any?(
+             tracks,
+             &(&1.slug == "foundations-complex-data-structures" and
+                 &1.title == "Foundations: Complex Data Structures")
+           )
 
-    assert Enum.any?(tracks, &(&1.slug == "foundations-functions-modules-pipe" and &1.title == "Foundations: Functions, Modules, and the Pipe Operator"))
+    assert Enum.any?(
+             tracks,
+             &(&1.slug == "foundations-functions-modules-pipe" and
+                 &1.title == "Foundations: Functions, Modules, and the Pipe Operator")
+           )
 
-    assert Enum.any?(tracks, &(&1.slug == "foundations-control-flow-with" and &1.title == "Foundations: Control Flow and the with Statement"))
+    assert Enum.any?(
+             tracks,
+             &(&1.slug == "foundations-control-flow-with" and
+                 &1.title == "Foundations: Control Flow and the with Statement")
+           )
 
-    assert Enum.any?(tracks, &(&1.slug == "foundations-enum-and-streams" and &1.title == "Foundations: Enumeration and Streams"))
+    assert Enum.any?(
+             tracks,
+             &(&1.slug == "foundations-enum-and-streams" and
+                 &1.title == "Foundations: Enumeration and Streams")
+           )
   end
 
   test "foundations lessons are ordered by prerequisites" do

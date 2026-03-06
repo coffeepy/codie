@@ -534,7 +534,8 @@ defmodule Codie.Curriculum.Catalog do
         track_slug: "foundations",
         slug: "immutability-shelf",
         title: "Immutability Shelf",
-        summary: "See that making a changed version creates a new value instead of changing the old one.",
+        summary:
+          "See that making a changed version creates a new value instead of changing the old one.",
         teaching_markdown: """
         What:
         Elixir data is immutable. That means values do not change in place.
@@ -1575,10 +1576,6 @@ defmodule Codie.Curriculum.Catalog do
             checkpoint: "Use a `case` expression",
             failure_message: "This lesson expects a `case` expression."
           ),
-          source_contains("{:ok, drink}",
-            checkpoint: "Match the success branch as `{:ok, drink}`",
-            failure_message: "Add a success branch that matches `{:ok, drink}`."
-          ),
           source_contains("{:error, _reason}",
             checkpoint: "Add an error branch",
             failure_message: "Add a fallback error branch like `{:error, _reason} -> \"stop\"`."
@@ -1853,8 +1850,8 @@ defmodule Codie.Curriculum.Catalog do
 
         Task:
         Keep `result = {:ok, "latte"}`.
-        Match it as `{:ok, drink} = result`.
-        Then return `drink`.
+        Match it with a tuple pattern like `{:ok, value} = result`.
+        Then return the matched value.
         """,
         starter_code: """
         result = {:ok, "latte"}
@@ -1862,9 +1859,9 @@ defmodule Codie.Curriculum.Catalog do
         """,
         prerequisites: ["match-assertion"],
         checks: [
-          source_contains("{:ok, drink} = result",
+          source_contains("} = result",
             checkpoint: "Unpack the tuple with a pattern",
-            failure_message: "Match the tuple as `{:ok, drink} = result`."
+            failure_message: "Match the tuple with a pattern like `{:ok, value} = result`."
           ),
           returns("latte",
             checkpoint: "Return `\"latte\"`",
@@ -1873,8 +1870,8 @@ defmodule Codie.Curriculum.Catalog do
         ],
         hints: [
           "Match both the `:ok` tag and the string at the same time.",
-          "Bind the second part to `drink`.",
-          "Return `drink` on the last line."
+          "Bind the second part to a variable like `drink`.",
+          "Return that variable on the last line."
         ],
         quick_terms: [
           quick_term(
@@ -1916,8 +1913,8 @@ defmodule Codie.Curriculum.Catalog do
 
         Task:
         Keep `supplies = [:beans, :water, :filter]`.
-        Match it as `[first | rest] = supplies`.
-        Then return `{first, length(rest)}`.
+        Match it with a list pattern like `[head | tail] = supplies`.
+        Then return a tuple with the first item and the number of remaining items.
         """,
         starter_code: """
         supplies = [:beans, :water, :filter]
@@ -1925,13 +1922,17 @@ defmodule Codie.Curriculum.Catalog do
         """,
         prerequisites: ["match-tuples-track"],
         checks: [
-          source_contains("[first | rest] = supplies",
+          source_contains("= supplies",
             checkpoint: "Split the list with a pattern",
-            failure_message: "Match the list as `[first | rest] = supplies`."
+            failure_message: "Match the list with a pattern like `[head | tail] = supplies`."
           ),
-          source_contains("length(rest)",
+          source_contains("|",
+            checkpoint: "Use the head/tail list pattern",
+            failure_message: "Use the `|` list pattern to split the first item from the rest."
+          ),
+          source_contains("length(",
             checkpoint: "Count the remaining items",
-            failure_message: "Use `length(rest)` in the returned tuple."
+            failure_message: "Use `length(...)` when building the returned tuple."
           ),
           returns({:beans, 2},
             checkpoint: "Return `{:beans, 2}`",
@@ -1940,8 +1941,8 @@ defmodule Codie.Curriculum.Catalog do
         ],
         hints: [
           "Use the list pattern on a new line before the final expression.",
-          "The first item should be bound as `first`.",
-          "The returned tuple should use `first` and `length(rest)`."
+          "Bind the first item and the remaining list with any clear variable names.",
+          "The returned tuple should use the first item and `length(...)` of the rest."
         ],
         quick_terms: [
           quick_term(
@@ -1985,7 +1986,7 @@ defmodule Codie.Curriculum.Catalog do
 
         Task:
         Keep `result = {:error, :empty}`.
-        Use `case` to return `"latte"` for `{:ok, drink}` and `"stop"` for `{:error, _reason}`.
+        Use `case` to return `"latte"` for a success tuple like `{:ok, value}` and `"stop"` for `{:error, _reason}`.
         """,
         starter_code: """
         result = {:error, :empty}
@@ -1997,9 +1998,9 @@ defmodule Codie.Curriculum.Catalog do
             checkpoint: "Use a `case` expression",
             failure_message: "This lesson expects a `case` expression."
           ),
-          source_contains("{:ok, drink}",
+          source_contains("{:ok, ",
             checkpoint: "Add the success pattern",
-            failure_message: "Add a branch that matches `{:ok, drink}`."
+            failure_message: "Add a branch that matches a success tuple like `{:ok, value}`."
           ),
           source_contains("{:error, _reason}",
             checkpoint: "Add the error pattern",
@@ -2007,12 +2008,13 @@ defmodule Codie.Curriculum.Catalog do
           ),
           returns("stop",
             checkpoint: "Return `\"stop\"`",
-            failure_message: "With `{:error, :empty}`, the final expression should evaluate to `\"stop\"`."
+            failure_message:
+              "With `{:error, :empty}`, the final expression should evaluate to `\"stop\"`."
           )
         ],
         hints: [
           "Start with `case result do`.",
-          "Give the success branch a name like `drink`.",
+          "Give the success branch a variable name like `drink` or `value`.",
           "The error branch should return `\"stop\"`."
         ],
         quick_terms: [
@@ -2034,7 +2036,8 @@ defmodule Codie.Curriculum.Catalog do
         track_slug: "foundations-pattern-matching",
         slug: "match-function-heads-track",
         title: "Match in Function Heads",
-        summary: "Use pattern matching in function signatures instead of matching later inside the body.",
+        summary:
+          "Use pattern matching in function signatures instead of matching later inside the body.",
         teaching_markdown: """
         What:
         Function clauses can pattern match in the argument list, so different shapes go to different function bodies.
@@ -2114,13 +2117,153 @@ defmodule Codie.Curriculum.Catalog do
       ),
       lesson(
         track_slug: "foundations-pattern-matching",
+        slug: "match-guards-track",
+        title: "Match Guards",
+        summary: "Use `when` guards on function heads to add conditions beyond shape.",
+        teaching_markdown: """
+        What:
+        A guard clause adds a condition after the function head using `when`. It lets you match by shape and test a value.
+
+        Example:
+        `def label(n) when n > 0, do: "positive"`
+        `def label(_n), do: "zero or negative"`
+
+        Why:
+        Pattern matching checks shape but not value ranges. Guards fill that gap with a readable, declarative check.
+
+        Common cases:
+        Restrict a clause to positive numbers
+        Handle different value ranges in separate clauses
+
+        Watch out:
+        Only a limited set of expressions are allowed in guards. Stick to comparisons, type checks, and arithmetic.
+
+        Task:
+        Define `CodiePlayground.Guard.label/1` with two clauses:
+        - When `n > 0`, return `"hot"`
+        - Otherwise, return `"cold"`
+
+        Make the final expression call `CodiePlayground.Guard.label(3)`.
+        """,
+        starter_code: """
+        defmodule CodiePlayground.Guard do
+          def label(_n), do: "todo"
+        end
+
+        CodiePlayground.Guard.label(0)
+        """,
+        prerequisites: ["match-function-heads-track"],
+        checks: [
+          ast_contains("when",
+            checkpoint: "Use a `when` guard",
+            failure_message: "Add a `when` guard to one of the function clauses."
+          ),
+          module_function(CodiePlayground.Guard, :label, [3], "hot",
+            checkpoint: "`label/1` should return `\"hot\"` for positive numbers",
+            failure_message: "`CodiePlayground.Guard.label(3)` should return `\"hot\"`."
+          ),
+          module_function(CodiePlayground.Guard, :label, [0], "cold",
+            checkpoint: "`label/1` should return `\"cold\"` for zero",
+            failure_message: "`CodiePlayground.Guard.label(0)` should return `\"cold\"`."
+          ),
+          returns("hot",
+            checkpoint: "Return `\"hot\"` from the final call",
+            failure_message: "The final expression should evaluate to `\"hot\"`."
+          )
+        ],
+        hints: [
+          "Write `def label(n) when n > 0, do: \"hot\"` as the first clause.",
+          "Add a catch-all clause `def label(_n), do: \"cold\"`.",
+          "Call `label(3)` on the final line."
+        ],
+        quick_terms: [
+          quick_term(
+            "Guard",
+            "A guard is a `when` condition on a function head that adds a value check beyond shape."
+          )
+        ],
+        rewards: reward(36, 2, 4, 4, 3, 1),
+        codex_entries_unlocked: [
+          codex(
+            "match-guards",
+            "Guards in Function Heads",
+            "Use `when` guards to add value conditions on top of pattern matching."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "foundations-pattern-matching",
+        slug: "match-pin-track",
+        title: "Pin Operator",
+        summary: "Use `^` to match against an existing variable's value instead of rebinding.",
+        teaching_markdown: """
+        What:
+        The pin operator `^` forces Elixir to match the current value of a variable instead of rebinding it.
+
+        Example:
+        `drink = "latte"`
+        `{^drink, size} = {"latte", :large}`
+
+        Why:
+        Without `^`, Elixir rebinds the variable to whatever is on the right side. The pin operator says "match this exact value."
+
+        Common cases:
+        Assert a known value in a pattern match
+        Match a previously bound variable in a tuple or list
+
+        Watch out:
+        If the pinned value does not match, you get a `MatchError` at runtime.
+
+        Task:
+        Bind `expected = "latte"`.
+        Then match `{^expected, size} = {"latte", :large}`.
+        Return `size`.
+        """,
+        starter_code: """
+        expected = "latte"
+        {_, size} = {"latte", :large}
+        size
+        """,
+        prerequisites: ["match-guards-track"],
+        checks: [
+          source_contains("^",
+            checkpoint: "Use the pin operator",
+            failure_message: "Use `^expected` in the pattern match."
+          ),
+          returns(:large,
+            checkpoint: "Return `:large`",
+            failure_message: "The final expression should evaluate to `:large`."
+          )
+        ],
+        hints: [
+          "Replace `_` with `^expected` in the tuple pattern.",
+          "The pin operator is `^` placed before the variable name.",
+          "The final expression should be `size`."
+        ],
+        quick_terms: [
+          quick_term(
+            "Pin operator",
+            "The `^` operator matches against an existing variable's value instead of rebinding it."
+          )
+        ],
+        rewards: reward(36, 2, 4, 4, 3, 1),
+        codex_entries_unlocked: [
+          codex(
+            "match-pin",
+            "Pin Operator",
+            "Use `^variable` to match the current value of a variable in a pattern."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "foundations-pattern-matching",
         slug: "pattern-roundup",
         title: "Pattern Roundup",
         tier: :boss,
-        summary: "Combine the main beginner pattern-matching forms in one small module.",
+        summary: "Combine the main beginner pattern-matching forms in one small module function.",
         teaching_markdown: """
         What:
-        This checkpoint combines direct matching, tuple matching, list matching, `case`, and function-head matching.
+        This checkpoint combines direct matching, tuple matching, list matching, and `case` inside one small module function.
 
         Example:
         `{:ok, drink} = result`
@@ -2132,7 +2275,7 @@ defmodule Codie.Curriculum.Catalog do
         Common cases:
         Assert a known value
         Unpack a result tuple
-        Route different shapes to different function clauses
+        Route a matched tuple through a `case` branch
 
         Watch out:
         Keep the matching in the most natural place: direct match for simple unpacking, `case` for branching, function heads for reusable logic.
@@ -2156,7 +2299,7 @@ defmodule Codie.Curriculum.Catalog do
 
         CodiePlayground.Patterns.summary(:ok, [])
         """,
-        prerequisites: ["match-function-heads-track"],
+        prerequisites: ["match-pin-track"],
         checks: [
           source_contains(":ok = status",
             checkpoint: "Assert the status first",
@@ -2170,7 +2313,11 @@ defmodule Codie.Curriculum.Catalog do
             checkpoint: "Use `case` for the result tuple",
             failure_message: "Use a `case` expression on the result tuple."
           ),
-          module_function(CodiePlayground.Patterns, :summary, [:ok, [:latte, :tea, :water]], "latte:2",
+          module_function(
+            CodiePlayground.Patterns,
+            :summary,
+            [:ok, [:latte, :tea, :water]],
+            "latte:2",
             checkpoint: "`summary/2` should return `\"latte:2\"`",
             failure_message:
               "`CodiePlayground.Patterns.summary(:ok, [:latte, :tea, :water])` should return `\"latte:2\"`."
@@ -2204,7 +2351,8 @@ defmodule Codie.Curriculum.Catalog do
         track_slug: "foundations-complex-data-structures",
         slug: "data-shapes-lists-tuples",
         title: "Data Shapes: Lists vs Tuples",
-        summary: "Compare lists and tuples directly by using their common operations side by side.",
+        summary:
+          "Compare lists and tuples directly by using their common operations side by side.",
         teaching_markdown: """
         What:
         Lists and tuples are both collections, but they are used differently in Elixir.
@@ -2786,13 +2934,305 @@ defmodule Codie.Curriculum.Catalog do
       ),
       lesson(
         track_slug: "foundations-functions-modules-pipe",
+        slug: "private-functions-lab",
+        title: "Private Functions Lab",
+        summary: "Use `defp` to define helper functions that stay inside the module.",
+        teaching_markdown: """
+        What:
+        `defp` defines a private function. It can only be called from inside the same module.
+
+        Example:
+        `defp normalize(drink), do: String.downcase(drink)`
+        `def label(drink), do: "serve " <> normalize(drink)`
+
+        Why:
+        Private functions keep internal logic hidden and the public API clean.
+
+        Common cases:
+        Extract a repeated transformation into a private helper
+        Keep implementation details out of the public interface
+
+        Watch out:
+        You cannot call a `defp` function from outside the module. It will raise an `UndefinedFunctionError`.
+
+        Task:
+        Define `CodiePlayground.Menu` with:
+        - a public `label/1` that returns `"serve " <> normalize(drink)`
+        - a private `normalize/1` that returns `String.downcase(drink)`
+
+        Call `CodiePlayground.Menu.label("LATTE")` as the final expression.
+        """,
+        starter_code: """
+        defmodule CodiePlayground.Menu do
+          def label(drink), do: drink
+        end
+
+        CodiePlayground.Menu.label("LATTE")
+        """,
+        prerequisites: ["module-functions-lab"],
+        checks: [
+          source_contains("defp",
+            checkpoint: "Use a private function",
+            failure_message: "Define a private helper with `defp`."
+          ),
+          module_function(CodiePlayground.Menu, :label, ["LATTE"], "serve latte",
+            checkpoint: "`label/1` should return `\"serve latte\"`",
+            failure_message:
+              "`CodiePlayground.Menu.label(\"LATTE\")` should return `\"serve latte\"`."
+          ),
+          returns("serve latte",
+            checkpoint: "Return `\"serve latte\"`",
+            failure_message: "The final expression should evaluate to `\"serve latte\"`."
+          )
+        ],
+        hints: [
+          "Add `defp normalize(drink), do: String.downcase(drink)` inside the module.",
+          "Call `normalize(drink)` from inside `label/1`.",
+          "The final line should call `label(\"LATTE\")`."
+        ],
+        quick_terms: [
+          quick_term(
+            "Private function",
+            "A `defp` function is only callable from within its own module."
+          )
+        ],
+        rewards: reward(34, 1, 4, 4, 3, 1),
+        codex_entries_unlocked: [
+          codex(
+            "private-functions",
+            "Private Functions",
+            "Use `defp` to define helper functions visible only inside the module."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "foundations-functions-modules-pipe",
+        slug: "module-directives-lab",
+        title: "Import Lab",
+        summary:
+          "Practice the `import` module directive so selected functions can be called without a module prefix.",
+        teaching_markdown: """
+        What:
+        This lesson focuses on `import`, one specific module directive. It pulls selected functions into scope so you can call them without the module prefix.
+
+        Example:
+        `import String, only: [upcase: 1]`
+
+        Why:
+        `import` reduces repetition when you want to use a specific function several times inside a module.
+
+        Common cases:
+        Import specific functions you use repeatedly
+
+        Watch out:
+        Import only the functions you need so it stays clear where names come from.
+
+        Task:
+        Define `CodiePlayground.Shorten` that:
+        - uses `import String, only: [upcase: 1]`
+        - defines `shout/1` that calls `upcase(drink)` directly (no `String.` prefix)
+
+        Call `CodiePlayground.Shorten.shout("latte")` as the final expression.
+        """,
+        starter_code: """
+        defmodule CodiePlayground.Shorten do
+          def shout(drink), do: drink
+        end
+
+        CodiePlayground.Shorten.shout("latte")
+        """,
+        prerequisites: ["private-functions-lab"],
+        checks: [
+          ast_contains("import",
+            checkpoint: "Use an `import` directive",
+            failure_message: "Add `import String, only: [upcase: 1]` inside the module."
+          ),
+          module_function(CodiePlayground.Shorten, :shout, ["latte"], "LATTE",
+            checkpoint: "`shout/1` should return `\"LATTE\"`",
+            failure_message:
+              "`CodiePlayground.Shorten.shout(\"latte\")` should return `\"LATTE\"`."
+          ),
+          returns("LATTE",
+            checkpoint: "Return `\"LATTE\"`",
+            failure_message: "The final expression should evaluate to `\"LATTE\"`."
+          )
+        ],
+        hints: [
+          "Add `import String, only: [upcase: 1]` at the top of the module body.",
+          "Call `upcase(drink)` directly inside `shout/1`.",
+          "The last line should call `shout(\"latte\")`."
+        ],
+        quick_terms: [
+          quick_term(
+            "Import",
+            "`import` brings functions from another module into scope so you can call them without a prefix."
+          )
+        ],
+        rewards: reward(34, 1, 4, 4, 3, 1),
+        codex_entries_unlocked: [
+          codex(
+            "imports",
+            "import",
+            "Use `import` to bring selected functions into scope without a module prefix."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "foundations-functions-modules-pipe",
+        slug: "module-attributes-lab",
+        title: "Module Attributes Lab",
+        summary:
+          "Use `@moduledoc`, `@doc`, and custom module attributes to store compile-time values.",
+        teaching_markdown: """
+        What:
+        Module attributes like `@moduledoc`, `@doc`, and custom ones like `@default_drink` store values at compile time.
+
+        Example:
+        `@default_drink "latte"`
+        `@doc "Returns the default drink."`
+        `def default, do: @default_drink`
+
+        Why:
+        Module attributes keep magic values named and centralized, and `@doc` helps others understand your code.
+
+        Common cases:
+        Document a module and its functions
+        Store a default or configuration value
+
+        Watch out:
+        Module attributes are set at compile time. They cannot change at runtime.
+
+        Task:
+        Define `CodiePlayground.Defaults` with:
+        - `@default_drink "latte"`
+        - a public `drink/0` that returns `@default_drink`
+
+        Call `CodiePlayground.Defaults.drink()` as the final expression.
+        """,
+        starter_code: """
+        defmodule CodiePlayground.Defaults do
+          def drink, do: "todo"
+        end
+
+        CodiePlayground.Defaults.drink()
+        """,
+        prerequisites: ["module-directives-lab"],
+        checks: [
+          source_contains("@",
+            checkpoint: "Use a module attribute",
+            failure_message: "Define a module attribute like `@default_drink \"latte\"`."
+          ),
+          module_function(CodiePlayground.Defaults, :drink, [], "latte",
+            checkpoint: "`drink/0` should return `\"latte\"`",
+            failure_message: "`CodiePlayground.Defaults.drink()` should return `\"latte\"`."
+          ),
+          returns("latte",
+            checkpoint: "Return `\"latte\"`",
+            failure_message: "The final expression should evaluate to `\"latte\"`."
+          )
+        ],
+        hints: [
+          "Add `@default_drink \"latte\"` inside the module, before the function.",
+          "Use `@default_drink` in the function body.",
+          "The final line should call `drink()`."
+        ],
+        quick_terms: [
+          quick_term(
+            "Module attribute",
+            "A module attribute like `@name` stores a compile-time value inside a module."
+          )
+        ],
+        rewards: reward(34, 1, 4, 4, 3, 1),
+        codex_entries_unlocked: [
+          codex(
+            "module-attributes",
+            "Module Attributes",
+            "Use `@` attributes to document modules and store compile-time constants."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "foundations-functions-modules-pipe",
+        slug: "recursion-lab",
+        title: "Recursion Lab",
+        summary: "Write a recursive function with a base case and a recursive case.",
+        teaching_markdown: """
+        What:
+        Recursion means a function calls itself. You need a base case to stop and a recursive case to continue.
+
+        Example:
+        `def total([]), do: 0`
+        `def total([head | tail]), do: head + total(tail)`
+
+        Why:
+        Recursion is a fundamental technique in Elixir for processing lists without mutable state.
+
+        Common cases:
+        Sum all items in a list
+        Process each element one at a time
+
+        Watch out:
+        Always define the base case first. Without it, recursion runs forever.
+
+        Task:
+        Define `CodiePlayground.Recurse.total/1` that:
+        - returns `0` for an empty list (base case)
+        - returns `head + total(tail)` for `[head | tail]` (recursive case)
+
+        Call `CodiePlayground.Recurse.total([1, 2, 3, 4])` as the final expression.
+        """,
+        starter_code: """
+        defmodule CodiePlayground.Recurse do
+          def total(_list), do: 0
+        end
+
+        CodiePlayground.Recurse.total([1, 2, 3, 4])
+        """,
+        prerequisites: ["module-attributes-lab"],
+        checks: [
+          module_function(CodiePlayground.Recurse, :total, [[1, 2, 3, 4]], 10,
+            checkpoint: "`total/1` should return `10`",
+            failure_message: "`CodiePlayground.Recurse.total([1, 2, 3, 4])` should return `10`."
+          ),
+          module_function(CodiePlayground.Recurse, :total, [[]], 0,
+            checkpoint: "`total/1` should return `0` for empty list",
+            failure_message: "`CodiePlayground.Recurse.total([])` should return `0`."
+          ),
+          returns(10,
+            checkpoint: "Return `10`",
+            failure_message: "The final expression should evaluate to `10`."
+          )
+        ],
+        hints: [
+          "Define `def total([]), do: 0` as the base case.",
+          "Define `def total([head | tail]), do: head + total(tail)` as the recursive case.",
+          "The final line should call `total([1, 2, 3, 4])`."
+        ],
+        quick_terms: [
+          quick_term(
+            "Recursion",
+            "Recursion is when a function calls itself, combined with a base case to stop."
+          )
+        ],
+        rewards: reward(38, 2, 4, 4, 3, 1),
+        codex_entries_unlocked: [
+          codex(
+            "recursion",
+            "Recursion",
+            "Recursive functions call themselves with a base case to stop and a recursive case to continue."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "foundations-functions-modules-pipe",
         slug: "functions-modules-pipe-roundup",
         title: "Functions, Modules, and Pipe Roundup",
         tier: :boss,
-        summary: "Combine anonymous functions, named functions, arity awareness, and a readable pipeline.",
+        summary:
+          "Combine named functions, a small module attribute, an anonymous function, and a readable pipeline.",
         teaching_markdown: """
         What:
-        This checkpoint combines the core function/module tools with a readable pipeline.
+        This checkpoint combines named functions, a small module attribute, an anonymous finishing function, and a readable pipeline.
 
         Example:
         `input |> Brew.trimmed() |> Brew.loud()`
@@ -2803,18 +3243,21 @@ defmodule Codie.Curriculum.Catalog do
 
         Common cases:
         Build a module with tiny focused functions
+        Keep a tiny constant in a module attribute
         Chain those functions with `|>`
         Finish with a one-off anonymous function
 
         Watch out:
-        Keep the function boundaries clear. Named functions handle reusable steps; anonymous functions handle small local finishing logic.
+        Keep the function boundaries clear. The module attribute should hold a tiny compile-time constant, named functions should handle reusable steps, and the anonymous function should handle the small local finishing logic.
 
         Task:
         Define `CodiePlayground.Format` with:
+        - `@suffix "!"`
         - `trimmed/1` using `String.trim/1`
         - `loud/1` using `String.upcase/1`
+        - `suffix/0` returning `@suffix`
 
-        Bind `finish = fn text -> text <> "!" end`.
+        Bind `finish = fn text -> text <> CodiePlayground.Format.suffix() end`.
         Start from `" latte "` and pipe through:
         - `CodiePlayground.Format.trimmed/1`
         - `CodiePlayground.Format.loud/1`
@@ -2824,14 +3267,16 @@ defmodule Codie.Curriculum.Catalog do
         """,
         starter_code: """
         defmodule CodiePlayground.Format do
+          @suffix "!"
           def trimmed(text), do: text
           def loud(text), do: text
+          def suffix, do: @suffix
         end
 
         finish = fn text -> text end
         " latte "
         """,
-        prerequisites: ["pipe-flow-lab"],
+        prerequisites: ["recursion-lab"],
         checks: [
           source_contains("defmodule CodiePlayground.Format",
             checkpoint: "Define the module",
@@ -2844,6 +3289,14 @@ defmodule Codie.Curriculum.Catalog do
           source_contains("def loud(",
             checkpoint: "Define `loud/1`",
             failure_message: "Define `loud/1` in the module."
+          ),
+          source_contains("@suffix",
+            checkpoint: "Store the exclamation mark in a module attribute",
+            failure_message: "Add a module attribute like `@suffix \"!\"` inside the module."
+          ),
+          module_function(CodiePlayground.Format, :suffix, [], "!",
+            checkpoint: "`suffix/0` should return `\"!\"`",
+            failure_message: "`CodiePlayground.Format.suffix()` should return `\"!\"`."
           ),
           source_contains("fn text ->",
             checkpoint: "Use an anonymous finishing function",
@@ -2859,8 +3312,9 @@ defmodule Codie.Curriculum.Catalog do
           )
         ],
         hints: [
+          "Set `@suffix \"!\"` near the top of the module and return it from `suffix/0`.",
           "Use `String.trim/1` and `String.upcase/1` in the module functions.",
-          "Make `finish` append `!`.",
+          "Make `finish` append `CodiePlayground.Format.suffix()`.",
           "Pipe the input into both module functions before `finish.(...)`."
         ],
         quick_terms: [
@@ -3157,7 +3611,8 @@ defmodule Codie.Curriculum.Catalog do
           ),
           returns({:ok, 4},
             checkpoint: "Return `{:ok, 4}`",
-            failure_message: "With `raw = \"4\"`, the final expression should evaluate to `{:ok, 4}`."
+            failure_message:
+              "With `raw = \"4\"`, the final expression should evaluate to `{:ok, 4}`."
           )
         ],
         hints: [
@@ -3551,6 +4006,204 @@ defmodule Codie.Curriculum.Catalog do
       ),
       lesson(
         track_slug: "foundations-enum-and-streams",
+        slug: "enum-filter-lab",
+        title: "Enum Filter Lab",
+        summary: "Use `Enum.filter/2` and `Enum.reject/2` to select or exclude items.",
+        teaching_markdown: """
+        What:
+        `Enum.filter/2` keeps items that pass a test. `Enum.reject/2` removes items that pass.
+
+        Example:
+        `Enum.filter([1, 2, 3, 4], fn n -> rem(n, 2) == 0 end)`
+        `Enum.reject(["", "latte", ""], fn s -> s == "" end)`
+
+        Why:
+        Filtering is one of the most common collection operations. Almost every app needs to narrow down a list.
+
+        Common cases:
+        Keep only even numbers
+        Remove blank strings from a list
+
+        Watch out:
+        `filter` keeps matches; `reject` removes matches. They are opposites.
+
+        Task:
+        Keep `drinks = ["latte", "", "mocha", "", "espresso"]`.
+        Use `Enum.filter/2` to keep only non-empty strings.
+        Then use `Enum.reject/2` on `[1, 2, 3, 4, 5]` to remove odd numbers.
+        Return `{filtered_drinks, even_numbers}`.
+        """,
+        starter_code: """
+        drinks = ["latte", "", "mocha", "", "espresso"]
+        {drinks, []}
+        """,
+        prerequisites: ["enum-reduce-lab"],
+        checks: [
+          source_contains("Enum.filter",
+            checkpoint: "Use `Enum.filter/2`",
+            failure_message: "Use `Enum.filter/2` to keep non-empty drinks."
+          ),
+          source_contains("Enum.reject",
+            checkpoint: "Use `Enum.reject/2`",
+            failure_message: "Use `Enum.reject/2` to remove odd numbers."
+          ),
+          returns({["latte", "mocha", "espresso"], [2, 4]},
+            checkpoint: "Return the correct filtered results",
+            failure_message:
+              "The final expression should evaluate to `{[\"latte\", \"mocha\", \"espresso\"], [2, 4]}`."
+          )
+        ],
+        hints: [
+          "Filter drinks with `fn s -> s != \"\" end`.",
+          "Reject odd numbers with `fn n -> rem(n, 2) != 0 end`.",
+          "Return both results as a tuple."
+        ],
+        quick_terms: [
+          quick_term(
+            "Filter",
+            "`Enum.filter/2` keeps items where the function returns truthy."
+          )
+        ],
+        rewards: reward(36, 1, 4, 4, 3, 1),
+        codex_entries_unlocked: [
+          codex(
+            "enum-filter",
+            "Enum.filter and Enum.reject",
+            "Use `Enum.filter/2` to keep matching items and `Enum.reject/2` to remove them."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "foundations-enum-and-streams",
+        slug: "enum-search-lab",
+        title: "Enum Search Lab",
+        summary: "Use `Enum.find/2` and `Enum.any?/2` to search and test collections.",
+        teaching_markdown: """
+        What:
+        `Enum.find/2` returns the first item matching a test. `Enum.any?/2` checks if at least one matches.
+
+        Example:
+        `Enum.find([3, 7, 2], fn n -> n > 5 end)`
+        `Enum.any?([1, 2, 3], fn n -> n > 2 end)`
+
+        Why:
+        Searching and testing collections is a daily task. These functions avoid manual loops.
+
+        Common cases:
+        Find the first matching item in a list
+        Check if any item meets a condition before proceeding
+
+        Watch out:
+        `Enum.find/2` returns `nil` if nothing matches — not an error.
+
+        Task:
+        Keep `numbers = [3, 7, 2, 9, 1]`.
+        Bind `found = Enum.find(numbers, fn n -> n > 5 end)`.
+        Bind `has_big = Enum.any?(numbers, fn n -> n > 8 end)`.
+        Return `{found, has_big}`.
+        """,
+        starter_code: """
+        numbers = [3, 7, 2, 9, 1]
+        {nil, false}
+        """,
+        prerequisites: ["enum-filter-lab"],
+        checks: [
+          source_contains("Enum.find",
+            checkpoint: "Use `Enum.find/2`",
+            failure_message: "Use `Enum.find/2` to find the first match."
+          ),
+          source_contains("Enum.any?",
+            checkpoint: "Use `Enum.any?/2`",
+            failure_message: "Use `Enum.any?/2` to check if any number is greater than 8."
+          ),
+          returns({7, true},
+            checkpoint: "Return `{7, true}`",
+            failure_message: "The final expression should evaluate to `{7, true}`."
+          )
+        ],
+        hints: [
+          "Find the first number greater than 5.",
+          "Check if any number is greater than 8.",
+          "Return a tuple of both results."
+        ],
+        quick_terms: [
+          quick_term(
+            "Predicate",
+            "A predicate is a function that returns true or false, used to test each item."
+          )
+        ],
+        rewards: reward(36, 1, 4, 4, 3, 1),
+        codex_entries_unlocked: [
+          codex(
+            "enum-search",
+            "Enum Search Functions",
+            "Use `Enum.find/2` and `Enum.any?/2` to search and test collections."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "foundations-enum-and-streams",
+        slug: "comprehensions-lab",
+        title: "Comprehensions Lab",
+        summary: "Use `for` comprehensions to generate and filter collections in one expression.",
+        teaching_markdown: """
+        What:
+        A `for` comprehension generates values from one or more generators and optionally filters them.
+
+        Example:
+        `for n <- 1..4, do: n * 2`
+        `for n <- 1..10, rem(n, 2) == 0, do: n`
+
+        Why:
+        Comprehensions combine generation and filtering into a single readable expression.
+
+        Common cases:
+        Generate a transformed list from a range
+        Filter and transform in one step
+
+        Watch out:
+        A comprehension always returns a list by default. Use `:into` to change the collection type.
+
+        Task:
+        Use a `for` comprehension to generate squares of numbers 1 through 5, but only keep the ones greater than 5.
+        Return the result.
+        """,
+        starter_code: """
+        []
+        """,
+        prerequisites: ["enum-search-lab"],
+        checks: [
+          ast_contains("for",
+            checkpoint: "Use a `for` comprehension",
+            failure_message: "Use a `for` comprehension with a generator and filter."
+          ),
+          returns([9, 16, 25],
+            checkpoint: "Return `[9, 16, 25]`",
+            failure_message: "The final expression should evaluate to `[9, 16, 25]`."
+          )
+        ],
+        hints: [
+          "Start with `for n <- 1..5`.",
+          "Add a filter: `n * n > 5`.",
+          "Use `do: n * n` to return the squared value."
+        ],
+        quick_terms: [
+          quick_term(
+            "Comprehension",
+            "A `for` comprehension generates values from generators and optionally filters them."
+          )
+        ],
+        rewards: reward(38, 1, 4, 4, 3, 1),
+        codex_entries_unlocked: [
+          codex(
+            "comprehensions",
+            "Comprehensions",
+            "Use `for` comprehensions to generate, filter, and transform collections in one expression."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "foundations-enum-and-streams",
         slug: "enumeration-streams-roundup",
         title: "Enumeration and Streams Roundup",
         tier: :boss,
@@ -3589,7 +4242,7 @@ defmodule Codie.Curriculum.Catalog do
 
         CodiePlayground.Enumerate.summary([])
         """,
-        prerequisites: ["stream-lazy-lab"],
+        prerequisites: ["comprehensions-lab"],
         checks: [
           source_contains("Enum.map",
             checkpoint: "Use eager map for total pipeline",
@@ -3861,7 +4514,7 @@ defmodule Codie.Curriculum.Catalog do
 
         Common cases:
         Read library output that shows a charlist
-        Notice why single-quoted text behaves like a list in some places
+        Notice why a charlist behaves like a list in some places
 
         Watch out:
         `~c"latte"` is not the same type as `"latte"`.
@@ -3890,7 +4543,7 @@ defmodule Codie.Curriculum.Catalog do
         ],
         hints: [
           "Use double quotes for `text`.",
-          "Use single quotes for `letters`.",
+          "Use `~c\"latte\"` for `letters`.",
           "A charlist can be counted with `length/1`."
         ],
         quick_terms: [
@@ -3904,7 +4557,70 @@ defmodule Codie.Curriculum.Catalog do
           codex(
             "charlists-new",
             "Charlists",
-            "Charlists use single quotes and behave like lists of character codes."
+            "Charlists are best written with `~c\"...\"` and behave like lists of character codes."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "foundations",
+        slug: "sigil-shelf",
+        title: "Sigil Shelf",
+        summary: "Use `~w()` to create a list of strings quickly.",
+        teaching_markdown: """
+        What:
+        Sigils are shortcuts that start with `~` and create common values. A beginner-friendly one is `~w()`, which makes a list of strings.
+
+        Example:
+        `~w(latte mocha)`
+
+        Why:
+        Sigils reduce boilerplate. A word list sigil saves you from writing quotes and commas for each item.
+
+        Common cases:
+        Create a list of words quickly with `~w()`
+        Count or inspect the generated list right away
+
+        Watch out:
+        `~w()` returns a list of strings by default. Add `a` for atoms: `~w(latte mocha)a`.
+
+        Task:
+        Use `~w` to build two drink names and return the result of `length(...)` so the final value is `2`.
+        """,
+        starter_code: """
+        0
+        """,
+        prerequisites: ["charlist-lane-new"],
+        checks: [
+          source_contains("~w",
+            checkpoint: "Use the `~w` sigil",
+            failure_message: "Use `~w(latte mocha)` to create the word list."
+          ),
+          source_contains("length(",
+            checkpoint: "Count the generated list with `length/1`",
+            failure_message: "Wrap the sigil in `length(...)`."
+          ),
+          returns(2,
+            checkpoint: "Return `2`",
+            failure_message: "The final expression should evaluate to `2`."
+          )
+        ],
+        hints: [
+          "Write `length(~w(latte mocha))` directly if you want the shortest answer.",
+          "`~w(...)` creates a list of strings automatically.",
+          "The final value should be the number `2`."
+        ],
+        quick_terms: [
+          quick_term(
+            "Sigil",
+            "A sigil is a `~` shortcut that builds common values like word lists, strings, or regexes."
+          )
+        ],
+        rewards: reward(28, 1, 4, 4, 3, 1),
+        codex_entries_unlocked: [
+          codex(
+            "sigils",
+            "Sigils",
+            "Use sigils like `~w()`, `~s()`, and `~r()` to create values with less boilerplate."
           )
         ]
       ),
@@ -3939,7 +4655,7 @@ defmodule Codie.Curriculum.Catalog do
         steps = 0..0
         {0, 0}
         """,
-        prerequisites: ["charlist-lane-new"],
+        prerequisites: ["sigil-shelf"],
         checks: [
           binds(:steps, 1..3),
           source_contains("steps.first",
@@ -6025,9 +6741,13 @@ defmodule Codie.Curriculum.Catalog do
         """,
         prerequisites: ["map-toolkit"],
         checks: [
-          source_contains("%{order | shots: 3}",
-            checkpoint: "Use map update syntax",
-            failure_message: "Update the map with `%{order | shots: 3}`."
+          binds(:order, %{shots: 2, milk: :oat},
+            checkpoint: "Keep the starting map binding",
+            failure_message: "Bind `order` as `%{shots: 2, milk: :oat}`."
+          ),
+          source_contains("shots",
+            checkpoint: "Update the `:shots` key",
+            failure_message: "Update the map so the `:shots` key becomes `3`."
           ),
           returns(%{shots: 3, milk: :oat},
             checkpoint: "Return the updated map",
@@ -6347,36 +7067,36 @@ defmodule Codie.Curriculum.Catalog do
         slug: "charlist-check",
         title: "Charlist Check",
         summary:
-          "Learn the difference between single-quoted charlists and double-quoted strings.",
+          "Learn the difference between an explicit `~c` charlist and a double-quoted string.",
         teaching_markdown: """
         What:
-        Double quotes create binaries (strings), while single quotes create charlists.
+        Double quotes create binaries (strings), while `~c` creates an explicit charlist.
 
         Example:
         `"ok"`
-        `'ok'`
+        `~c"ok"`
 
         Why:
         This is one of the most common beginner traps in Elixir because the values look similar.
 
         Common cases:
         `"ok"` for ordinary Elixir string work
-        `'ok'` when older Erlang-style APIs expect a charlist
+        `~c"ok"` when older Erlang-style APIs expect a charlist
 
         Watch out:
-        Single and double quotes are not interchangeable in Elixir.
+        `~c"ok"` and `"ok"` are different types in Elixir.
 
         Task:
-        Return `{is_list('ok'), is_binary("ok")}` so you prove which one is a list and which one is a binary.
+        Return `{is_list(~c"ok"), is_binary("ok")}` so you prove which one is a list and which one is a binary.
         """,
         starter_code: """
         {false, false}
         """,
         prerequisites: ["document-the-brew"],
         checks: [
-          source_contains("'ok'",
-            checkpoint: "Use a single-quoted charlist",
-            failure_message: "Use `'ok'` somewhere in the solution."
+          source_contains(~S|~c"ok"|,
+            checkpoint: "Use a `~c` charlist",
+            failure_message: "Use `~c\"ok\"` somewhere in the solution."
           ),
           source_contains("\"ok\"",
             checkpoint: "Use a double-quoted string",
@@ -6398,7 +7118,7 @@ defmodule Codie.Curriculum.Catalog do
         hints: [
           "Use a tuple with two checks.",
           "A charlist is a list, and a string is a binary.",
-          "The full answer can be `{is_list('ok'), is_binary(\"ok\")}`."
+          "The full answer can be `{is_list(~c\"ok\"), is_binary(\"ok\")}`."
         ],
         quick_terms: [
           quick_term(
@@ -6407,7 +7127,7 @@ defmodule Codie.Curriculum.Catalog do
           ),
           quick_term(
             "Charlist",
-            "A charlist is a list of character codepoints. It uses single quotes and is a different type from a string."
+            "A charlist is a list of character codepoints. `~c\"...\"` is the clearest way to write one."
           )
         ],
         rewards: reward(32, 1, 4, 4, 3, 1),
@@ -6415,7 +7135,7 @@ defmodule Codie.Curriculum.Catalog do
           codex(
             "charlists",
             "Charlists",
-            "Single quotes create charlists, which are lists of codepoints, not binaries."
+            "A charlist like `~c\"ok\"` is a list of codepoints, not a binary string."
           )
         ]
       ),
@@ -7771,10 +8491,11 @@ defmodule Codie.Curriculum.Catalog do
   defp codex_example("with"), do: "with {:ok, token} <- normalize(input) do ... end"
   defp codex_example("io-inspect"), do: ~S|IO.inspect(total, label: "total")|
   defp codex_example("docs"), do: ~S|@doc "Says hello"|
-  defp codex_example("charlists"), do: "'ok'"
+  defp codex_example("charlists"), do: ~S|~c"ok"|
   defp codex_example("pin-operator"), do: "{^drink, milk} = {\"latte\", :oat}"
   defp codex_example("default-arguments"), do: ~S|def greet(name \\ "world")|
-  defp codex_example("module-directives"), do: "alias String, as: BrewString"
+  defp codex_example("imports"), do: "import String, only: [upcase: 1]"
+  defp codex_example("module-directives"), do: "import String, only: [upcase: 1]"
   defp codex_example("use"), do: "use CodiePlayground.Wakeable"
   defp codex_example("structs"), do: "defstruct name: \"Nova\", awake?: false"
   defp codex_example("module-attributes"), do: ~S|@default_drink "latte"|
@@ -7785,6 +8506,11 @@ defmodule Codie.Curriculum.Catalog do
   defp codex_example("catch"), do: "try do ... catch :skip -> :caught end"
   defp codex_example("sigils"), do: "~w(latte mocha)"
   defp codex_example("file-path"), do: "Path.extname(\"submission.exs\")"
+  defp codex_example("match-guards"), do: "def label(n) when n > 0, do: \"hot\""
+  defp codex_example("match-pin"), do: "{^drink, size} = {\"latte\", :large}"
+  defp codex_example("private-functions"), do: "defp normalize(drink), do: String.downcase(drink)"
+  defp codex_example("enum-filter"), do: "Enum.filter([1, 2, 3], fn n -> rem(n, 2) == 0 end)"
+  defp codex_example("enum-search"), do: "Enum.find([3, 7, 2], fn n -> n > 5 end)"
   defp codex_example(_key), do: "# Revisit the unlocked lesson for a focused example."
 
   defp codex_watch_out("pattern-matching"),
@@ -7803,7 +8529,7 @@ defmodule Codie.Curriculum.Catalog do
     do: "Each `<-` expects a matching shape. A non-matching value jumps to `else`."
 
   defp codex_watch_out("charlists"),
-    do: "Single quotes and double quotes produce different types in Elixir."
+    do: "A charlist like `~c\"ok\"` is a list, while `\"ok\"` is a binary string."
 
   defp codex_watch_out("map-update"),
     do: "Map update syntax expects the key to already exist."
