@@ -21,6 +21,8 @@ config :codie, CodieWeb.Endpoint,
   check_origin: false,
   code_reloader: true,
   debug_errors: true,
+  log_access_url: false,
+  runtime_access_url: true,
   secret_key_base: "qmZFiqEs+8dMaLC09nuHm/gtD5dxgd3USTjjh79RBkJsmnJ5hu7Ce9s52bCLezc+",
   watchers: [
     esbuild: {Esbuild, :install_and_run, [:codie, ~w(--sourcemap=inline --watch)]},
