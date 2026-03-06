@@ -198,7 +198,7 @@ defmodule CodieWeb.LessonLive do
           <span>{@lesson.estimated_minutes} min</span>
         </div>
         <p class="hero-text">{@lesson.summary}</p>
-        <pre class="lesson-copy">{@lesson.teaching_markdown}</pre>
+        <div class="lesson-copy">{parse_teaching_content(@lesson.teaching_markdown)}</div>
 
         <div :if={@lesson.quick_terms != []} class="hints-card">
           <div class="section-heading">
@@ -398,6 +398,99 @@ defmodule CodieWeb.LessonLive do
     socket.assigns
     |> Map.get(:editor_version, 0)
     |> Kernel.+(1)
+  end
+
+  defp parse_teaching_content(nil), do: ""
+
+  defp parse_teaching_content(text) do
+    text
+    |> String.trim()
+    |> String.split(~r/\n\s*\n/, trim: true)
+    |> Enum.reduce([], fn block, acc ->
+      lines = String.split(block, "\n", trim: true)
+
+      case lines do
+        [header | body] when body != [] ->
+          if Regex.match?(~r/^[A-Za-z\s]+:\s*$/, header) do
+            acc ++ [{:section, String.trim_trailing(header, ":") |> String.trim(), body}]
+          else
+            acc ++ [{:paragraph, lines}]
+          end
+
+        [single_line] ->
+          if Regex.match?(~r/^[A-Za-z\s]+:\s*$/, single_line) do
+            acc ++ [{:section, String.trim_trailing(single_line, ":") |> String.trim(), []}]
+          else
+            acc ++ [{:paragraph, [single_line]}]
+          end
+
+        _ ->
+          acc ++ [{:paragraph, lines}]
+      end
+    end)
+    |> render_blocks()
+  end
+
+  defp render_blocks(blocks) do
+    html =
+      Enum.map_join(blocks, "", fn
+        {:section, header, body_lines} ->
+          body_html = Enum.map_join(body_lines, "\n", &render_line/1)
+
+          """
+          <div class="teaching-section">
+            <div class="teaching-header">#{Phoenix.HTML.html_escape(header) |> Phoenix.HTML.safe_to_string()}</div>
+            <div class="teaching-body">#{body_html}</div>
+          </div>
+          """
+
+        {:paragraph, lines} ->
+          body_html = Enum.map_join(lines, "\n", &render_line/1)
+
+          """
+          <div class="teaching-section">
+            <div class="teaching-body">#{body_html}</div>
+          </div>
+          """
+      end)
+
+    Phoenix.HTML.raw(html)
+  end
+
+  defp render_line(line) do
+    trimmed = String.trim(line)
+
+    if String.starts_with?(trimmed, "`") and String.ends_with?(trimmed, "`") and
+         byte_size(trimmed) > 2 do
+      code_content =
+        trimmed
+        |> String.trim_leading("`")
+        |> String.trim_trailing("`")
+        |> Phoenix.HTML.html_escape()
+        |> Phoenix.HTML.safe_to_string()
+
+      ~s(<div class="code-line"><code>#{code_content}</code></div>)
+    else
+      render_inline_code(line)
+    end
+  end
+
+  defp render_inline_code(line) do
+    Regex.split(~r/(`[^`]+`)/, line, include_captures: true)
+    |> Enum.map_join("", fn part ->
+      if String.starts_with?(part, "`") and String.ends_with?(part, "`") do
+        code =
+          part
+          |> String.trim_leading("`")
+          |> String.trim_trailing("`")
+          |> Phoenix.HTML.html_escape()
+          |> Phoenix.HTML.safe_to_string()
+
+        "<code>#{code}</code>"
+      else
+        Phoenix.HTML.html_escape(part) |> Phoenix.HTML.safe_to_string()
+      end
+    end)
   end
 
   defp next_lessons_for(profile, lesson) do
