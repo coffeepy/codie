@@ -17,7 +17,7 @@ defmodule Codie.Application do
       {Task.Supervisor, name: Codie.Runner.TaskSupervisor},
       # Start to serve requests, typically the last entry
       CodieWeb.Endpoint
-    ]
+    ] ++ runtime_access_url_children()
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
@@ -36,5 +36,13 @@ defmodule Codie.Application do
   defp skip_migrations?() do
     # By default, sqlite migrations are run when using a release
     System.get_env("RELEASE_NAME") == nil
+  end
+
+  defp runtime_access_url_children() do
+    if Application.get_env(:codie, CodieWeb.Endpoint, [])[:runtime_access_url] do
+      [CodieWeb.DevAccessUrlLogger]
+    else
+      []
+    end
   end
 end
