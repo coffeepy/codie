@@ -20,7 +20,10 @@ defmodule CodieWeb.DevAccessUrlLoggerTest do
   test "logs a clickable access URL with the runtime port" do
     log =
       capture_log(fn ->
-        DevAccessUrlLogger.log_runtime_access_url({:ok, {{127, 0, 0, 1}, 59_582}}, URI.parse("http://localhost"))
+        DevAccessUrlLogger.log_runtime_access_url(
+          {:ok, {{127, 0, 0, 1}, 59_582}},
+          URI.parse("http://localhost")
+        )
       end)
 
     assert log =~ "Open Codie at http://localhost:59582"
