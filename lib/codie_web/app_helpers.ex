@@ -43,6 +43,22 @@ defmodule CodieWeb.AppHelpers do
   def result_card_class("timeout"), do: "result-card result-danger"
   def result_card_class(_), do: "result-card"
 
+  def result_status_pill_class(:pass), do: "status-pill status-passed"
+  def result_status_pill_class("pass"), do: "status-pill status-passed"
+  def result_status_pill_class(:fail_test), do: "status-pill status-progress"
+  def result_status_pill_class("fail_test"), do: "status-pill status-progress"
+  def result_status_pill_class(:fail_compile), do: "status-pill status-progress"
+  def result_status_pill_class("fail_compile"), do: "status-pill status-progress"
+  def result_status_pill_class(:runtime_error), do: "status-pill status-danger"
+  def result_status_pill_class("runtime_error"), do: "status-pill status-danger"
+  def result_status_pill_class(:timeout), do: "status-pill status-danger"
+  def result_status_pill_class("timeout"), do: "status-pill status-danger"
+  def result_status_pill_class(:rejected_submission), do: "status-pill status-danger"
+  def result_status_pill_class("rejected_submission"), do: "status-pill status-danger"
+  def result_status_pill_class(:runner_error), do: "status-pill status-danger"
+  def result_status_pill_class("runner_error"), do: "status-pill status-danger"
+  def result_status_pill_class(_), do: "status-pill status-locked"
+
   def human_result(nil), do: "No attempts yet"
   def human_result(:pass), do: "Passed"
   def human_result("pass"), do: "Passed"
@@ -61,6 +77,9 @@ defmodule CodieWeb.AppHelpers do
 
   def human_result(other),
     do: other |> to_string() |> String.replace("_", " ") |> String.capitalize()
+
+  def signed_amount(value) when is_number(value) and value > 0, do: "+#{value}"
+  def signed_amount(value) when is_number(value), do: "#{value}"
 
   def tier_label(:boss), do: "Boss"
   def tier_label(_), do: "Lesson"

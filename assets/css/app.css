@@ -246,7 +246,8 @@ textarea {
 }
 
 .lesson-shell {
-  grid-template-columns: minmax(290px, 0.88fr) minmax(0, 1.12fr);
+  gap: 1.5rem;
+  grid-template-columns: minmax(320px, 0.96fr) minmax(0, 1.04fr);
   align-items: start;
 }
 
@@ -487,6 +488,12 @@ textarea {
   border-color: rgba(255, 255, 255, 0.09);
 }
 
+.status-danger {
+  color: #ffd8d2;
+  background: rgba(255, 141, 127, 0.16);
+  border-color: rgba(255, 141, 127, 0.28);
+}
+
 .mini-code,
 .runner-log,
 .code-textarea {
@@ -506,11 +513,30 @@ textarea {
   background: rgba(15, 11, 10, 0.72);
   color: #f8ece3;
   line-height: 1.6;
-  padding: 1.25rem 1.5rem;
+  padding: 1.5rem 1.75rem;
+}
+
+.lesson-brief {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.lesson-brief .section-heading {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.lesson-brief .section-heading .eyebrow {
+  margin: 0;
+}
+
+.lesson-brief > .hero-text {
+  margin: 0;
+  line-height: 1.72;
 }
 
 .lesson-copy .teaching-section {
-  margin-bottom: 1rem;
+  margin-bottom: 1.35rem;
 }
 
 .lesson-copy .teaching-section:last-child {
@@ -523,12 +549,13 @@ textarea {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: rgba(223, 143, 63, 0.85);
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.5rem;
 }
 
 .lesson-copy .teaching-body {
-  font-size: 0.95rem;
+  font-size: 0.97rem;
   color: #f8ece3;
+  line-height: 1.72;
 }
 
 .lesson-copy .teaching-body code {
@@ -541,7 +568,7 @@ textarea {
 
 .lesson-copy .teaching-body .code-line {
   display: block;
-  margin: 0.25rem 0;
+  margin: 0.35rem 0;
   font-family: "Iosevka", "IBM Plex Mono", "SFMono-Regular", monospace;
 }
 
@@ -559,6 +586,12 @@ textarea {
 
 .editor-shell {
   display: grid;
+  gap: 1rem;
+}
+
+.post-run-stack {
+  display: grid;
+  margin-top: 0.75rem;
   gap: 1rem;
 }
 
@@ -611,21 +644,151 @@ textarea {
   background: rgba(255, 255, 255, 0.03);
 }
 
+.result-card,
+.reward-banner {
+  display: grid;
+  gap: 0.95rem;
+  padding: 1.15rem 1.2rem;
+}
+
+.result-card .section-heading,
+.reward-banner .section-heading {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.result-card .eyebrow,
+.reward-next-list .eyebrow {
+  margin: 0;
+}
+
+.result-card p,
+.reward-banner p {
+  margin: 0;
+  line-height: 1.6;
+}
+
+.runner-summary-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  justify-content: space-between;
+  gap: 0.9rem;
+}
+
+.runner-meta-grid,
+.reward-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+  gap: 0.75rem;
+}
+
+.runner-meta-card,
+.reward-stat-card,
+.runner-copy-block,
+.runner-annotation-list,
+.reward-next-list {
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(14, 11, 10, 0.18);
+}
+
+.runner-meta-card,
+.reward-stat-card {
+  display: grid;
+  gap: 0.3rem;
+  padding: 0.9rem 0.95rem;
+}
+
+.runner-meta-card span,
+.reward-stat-card span,
+.runner-copy-block span,
+.runner-annotation-label,
+.runner-log-label {
+  color: rgba(255, 233, 213, 0.72);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.runner-meta-card strong,
+.reward-stat-card strong {
+  font-size: 1.05rem;
+  line-height: 1.3;
+}
+
+.runner-copy-block,
+.runner-annotation-list,
+.reward-next-list {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.95rem 1rem;
+}
+
+.runner-copy-block p {
+  color: var(--copy);
+}
+
+.runner-annotation {
+  color: var(--copy);
+}
+
+.runner-annotation + .runner-annotation {
+  padding-top: 0.45rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.runner-log-shell {
+  display: grid;
+  gap: 0.7rem;
+  padding: 0.95rem 1rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(14, 11, 10, 0.22);
+}
+
+.runner-log-heading,
+.reward-next-heading,
+.reward-header {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.result-card .runner-log {
+  margin: 0;
+  padding: 1.1rem 1.15rem;
+  line-height: 1.65;
+  border-radius: 0.95rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(7, 6, 6, 0.42);
+}
+
 .checkpoint-list {
   display: grid;
-  gap: 0.6rem;
+  gap: 0.8rem;
 }
 
 .quick-terms-list {
   display: grid;
-  gap: 0.6rem;
+  gap: 0.8rem;
+}
+
+.hints-card {
+  display: grid;
+  gap: 0.95rem;
+  padding: 1.15rem 1.2rem;
+}
+
+.hints-card .section-heading {
+  margin-bottom: 0.1rem;
 }
 
 .quick-term-card {
   border-radius: 0.95rem;
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(255, 255, 255, 0.025);
-  padding: 0.8rem 0.9rem;
+  padding: 0.95rem 1rem;
 }
 
 .quick-term-card summary {
@@ -635,14 +798,23 @@ textarea {
 }
 
 .quick-term-card p {
-  margin: 0.6rem 0 0;
+  margin: 0.7rem 0 0;
   color: var(--muted);
+  line-height: 1.65;
 }
 
 .checkpoint-line,
 .hint-line {
   margin: 0;
   color: var(--copy);
+}
+
+.hint-line + .hint-line {
+  margin-top: 0.8rem;
+}
+
+.hints-card .secondary-cta {
+  margin-top: 0.15rem;
 }
 
 .checkpoint-line::before {
@@ -666,10 +838,31 @@ textarea {
 }
 
 .reward-banner {
-  display: grid;
-  gap: 0.75rem;
   border-color: rgba(133, 184, 255, 0.28);
   background: linear-gradient(135deg, rgba(133, 184, 255, 0.12), rgba(108, 209, 176, 0.1));
+}
+
+.reward-summary {
+  max-width: 30rem;
+}
+
+.reward-next-list {
+  gap: 0.8rem;
+}
+
+.reward-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+}
+
+.reward-next-list .secondary-cta,
+.reward-banner > .secondary-cta {
+  justify-self: start;
+}
+
+.reward-actions .secondary-cta {
+  min-width: 12rem;
 }
 
 .track-grid .lesson-node {
@@ -739,6 +932,10 @@ textarea {
   .lesson-brief,
   .editor-panel {
     position: static;
+  }
+
+  .lesson-copy {
+    padding: 1.35rem 1.25rem;
   }
 
   .site-nav {

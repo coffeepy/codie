@@ -3229,7 +3229,7 @@ defmodule Codie.Curriculum.Catalog do
         title: "Functions, Modules, and Pipe Roundup",
         tier: :boss,
         summary:
-          "Combine named functions, a small module attribute, an anonymous function, and a readable pipeline.",
+          "Combine named functions, a small module attribute, arity awareness, an anonymous function, and a readable pipeline.",
         teaching_markdown: """
         What:
         This checkpoint combines named functions, a small module attribute, an anonymous finishing function, and a readable pipeline.

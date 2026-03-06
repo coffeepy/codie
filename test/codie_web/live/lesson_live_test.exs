@@ -41,6 +41,13 @@ defmodule CodieWeb.LessonLiveTest do
     assert html =~ "Checking..."
     assert eventually(fn -> render(view) =~ "Lesson cleared" end)
     assert render(view) =~ "Every lesson check passed."
+    assert has_element?(view, "#lesson-run-feedback")
+    assert has_element?(view, "#lesson-result-card")
+    assert has_element?(view, "#lesson-reward-banner")
+    assert has_element?(view, "#lesson-result-card .runner-meta-card", "Passed")
+    assert has_element?(view, "#lesson-reward-banner .reward-stat-grid")
+    assert has_element?(view, "#lesson-reward-banner .reward-stat-card", "XP")
+    assert has_element?(view, "#lesson-reward-banner .reward-actions .secondary-cta")
   end
 
   test "passing a lesson shows linked next lessons when available", %{conn: conn} do
