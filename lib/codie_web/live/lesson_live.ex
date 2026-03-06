@@ -198,7 +198,7 @@ defmodule CodieWeb.LessonLive do
           <span>{@lesson.estimated_minutes} min</span>
         </div>
         <p class="hero-text">{@lesson.summary}</p>
-        <pre class="lesson-copy">{@lesson.teaching_markdown}</pre>
+        <div class="lesson-copy">{parse_teaching_content(@lesson.teaching_markdown)}</div>
 
         <div :if={@lesson.quick_terms != []} class="hints-card">
           <div class="section-heading">
@@ -299,39 +299,121 @@ defmodule CodieWeb.LessonLive do
           </div>
         </.form>
 
-        <div :if={@latest_result} class={result_card_class(@latest_result.status)}>
-          <div class="section-heading">
-            <p class="eyebrow">Runner</p>
-            <h3>{@latest_result.summary}</h3>
-          </div>
-          <p><strong>Status:</strong> {human_result(@latest_result.status)}</p>
-          <p><strong>Compile:</strong> {@latest_result.compile_output}</p>
-          <pre class="runner-log">{@latest_result.test_output}</pre>
-          <p class="muted-copy">Runtime: {@latest_result.runtime_ms}ms</p>
-        </div>
-
-        <div :if={@reward_result} class="reward-banner">
-          <h3>Lesson cleared</h3>
-          <p>
-            +{@reward_result.xp_gained} XP, +{@reward_result.coffee_gained} beans, +{@reward_result.stat_changes.energy} energy
-          </p>
-          <div :if={@next_lessons != []} class="reward-next-list">
-            <p class="eyebrow">Linked Next Lessons</p>
-            <.link
-              :for={next <- @next_lessons}
-              navigate={~p"/lesson/#{next.slug}"}
-              class="secondary-cta"
-            >
-              Next: {next.title}
-            </.link>
-          </div>
-          <.link
-            :if={@next_lessons == [] && @next_lesson && @next_lesson.slug != @lesson.slug}
-            navigate={~p"/lesson/#{@next_lesson.slug}"}
-            class="secondary-cta"
+        <div :if={@latest_result || @reward_result} id="lesson-run-feedback" class="post-run-stack">
+          <div
+            :if={@latest_result}
+            id="lesson-result-card"
+            class={result_card_class(@latest_result.status)}
           >
-            Next Lesson
-          </.link>
+            <div class="runner-summary-row">
+              <div class="section-heading">
+                <p class="eyebrow">Runner</p>
+                <h3>{@latest_result.summary}</h3>
+              </div>
+              <span class={result_status_pill_class(@latest_result.status)}>
+                {human_result(@latest_result.status)}
+              </span>
+            </div>
+
+            <div class="runner-meta-grid">
+              <div class="runner-meta-card">
+                <span>Run status</span>
+                <strong>{human_result(@latest_result.status)}</strong>
+              </div>
+              <div class="runner-meta-card">
+                <span>Runtime</span>
+                <strong>{@latest_result.runtime_ms}ms</strong>
+              </div>
+            </div>
+
+            <div class="runner-copy-block">
+              <span>Compile</span>
+              <p>{@latest_result.compile_output}</p>
+            </div>
+
+            <div :if={@latest_result.annotations != []} class="runner-annotation-list">
+              <span class="runner-annotation-label">Focus next</span>
+              <p :for={annotation <- @latest_result.annotations} class="runner-annotation">
+                {annotation}
+              </p>
+            </div>
+
+            <div class="runner-log-shell">
+              <div class="runner-log-heading">
+                <span class="runner-log-label">Runner notes</span>
+                <span class="muted-copy">Latest output</span>
+              </div>
+              <pre class="runner-log">{@latest_result.test_output}</pre>
+            </div>
+          </div>
+
+          <div :if={@reward_result} id="lesson-reward-banner" class="reward-banner">
+            <div class="reward-header">
+              <div class="section-heading">
+                <p class="eyebrow">Completion</p>
+                <h3>Lesson cleared</h3>
+              </div>
+              <p class="reward-summary">Codie banks the win and turns it into permanent progress.</p>
+            </div>
+
+            <div class="reward-stat-grid">
+              <div class="reward-stat-card">
+                <span>XP</span>
+                <strong>{signed_amount(@reward_result.xp_gained)}</strong>
+              </div>
+              <div class="reward-stat-card">
+                <span>Beans</span>
+                <strong>{signed_amount(@reward_result.coffee_gained)}</strong>
+              </div>
+              <div class="reward-stat-card">
+                <span>Energy</span>
+                <strong>{signed_amount(@reward_result.stat_changes.energy)}</strong>
+              </div>
+              <div :if={@reward_result.stat_changes.focus != 0} class="reward-stat-card">
+                <span>Focus</span>
+                <strong>{signed_amount(@reward_result.stat_changes.focus)}</strong>
+              </div>
+              <div :if={@reward_result.stat_changes.mood != 0} class="reward-stat-card">
+                <span>Mood</span>
+                <strong>{signed_amount(@reward_result.stat_changes.mood)}</strong>
+              </div>
+              <div :if={@reward_result.stat_changes.caffeine != 0} class="reward-stat-card">
+                <span>Caffeine</span>
+                <strong>{signed_amount(@reward_result.stat_changes.caffeine)}</strong>
+              </div>
+            </div>
+
+            <div :if={@next_lessons != []} class="reward-next-list">
+              <div class="reward-next-heading">
+                <p class="eyebrow">Linked Next Lessons</p>
+                <p class="muted-copy">Keep the momentum going with the next unlocked nodes.</p>
+              </div>
+              <div class="reward-actions">
+                <.link
+                  :for={next <- @next_lessons}
+                  navigate={~p"/lesson/#{next.slug}"}
+                  class="secondary-cta"
+                >
+                  Next: {next.title}
+                </.link>
+              </div>
+            </div>
+
+            <div
+              :if={@next_lessons == [] && @next_lesson && @next_lesson.slug != @lesson.slug}
+              class="reward-next-list"
+            >
+              <div class="reward-next-heading">
+                <p class="eyebrow">Next Lesson</p>
+                <p class="muted-copy">Take the clean handoff straight into the next challenge.</p>
+              </div>
+              <div class="reward-actions">
+                <.link navigate={~p"/lesson/#{@next_lesson.slug}"} class="secondary-cta">
+                  Continue forward
+                </.link>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -398,6 +480,99 @@ defmodule CodieWeb.LessonLive do
     socket.assigns
     |> Map.get(:editor_version, 0)
     |> Kernel.+(1)
+  end
+
+  defp parse_teaching_content(nil), do: ""
+
+  defp parse_teaching_content(text) do
+    text
+    |> String.trim()
+    |> String.split(~r/\n\s*\n/, trim: true)
+    |> Enum.reduce([], fn block, acc ->
+      lines = String.split(block, "\n", trim: true)
+
+      case lines do
+        [header | body] when body != [] ->
+          if Regex.match?(~r/^[A-Za-z\s]+:\s*$/, header) do
+            acc ++ [{:section, String.trim_trailing(header, ":") |> String.trim(), body}]
+          else
+            acc ++ [{:paragraph, lines}]
+          end
+
+        [single_line] ->
+          if Regex.match?(~r/^[A-Za-z\s]+:\s*$/, single_line) do
+            acc ++ [{:section, String.trim_trailing(single_line, ":") |> String.trim(), []}]
+          else
+            acc ++ [{:paragraph, [single_line]}]
+          end
+
+        _ ->
+          acc ++ [{:paragraph, lines}]
+      end
+    end)
+    |> render_blocks()
+  end
+
+  defp render_blocks(blocks) do
+    html =
+      Enum.map_join(blocks, "", fn
+        {:section, header, body_lines} ->
+          body_html = Enum.map_join(body_lines, "\n", &render_line/1)
+
+          """
+          <div class="teaching-section">
+            <div class="teaching-header">#{Phoenix.HTML.html_escape(header) |> Phoenix.HTML.safe_to_string()}</div>
+            <div class="teaching-body">#{body_html}</div>
+          </div>
+          """
+
+        {:paragraph, lines} ->
+          body_html = Enum.map_join(lines, "\n", &render_line/1)
+
+          """
+          <div class="teaching-section">
+            <div class="teaching-body">#{body_html}</div>
+          </div>
+          """
+      end)
+
+    Phoenix.HTML.raw(html)
+  end
+
+  defp render_line(line) do
+    trimmed = String.trim(line)
+
+    if String.starts_with?(trimmed, "`") and String.ends_with?(trimmed, "`") and
+         byte_size(trimmed) > 2 do
+      code_content =
+        trimmed
+        |> String.trim_leading("`")
+        |> String.trim_trailing("`")
+        |> Phoenix.HTML.html_escape()
+        |> Phoenix.HTML.safe_to_string()
+
+      ~s(<div class="code-line"><code>#{code_content}</code></div>)
+    else
+      render_inline_code(line)
+    end
+  end
+
+  defp render_inline_code(line) do
+    Regex.split(~r/(`[^`]+`)/, line, include_captures: true)
+    |> Enum.map_join("", fn part ->
+      if String.starts_with?(part, "`") and String.ends_with?(part, "`") do
+        code =
+          part
+          |> String.trim_leading("`")
+          |> String.trim_trailing("`")
+          |> Phoenix.HTML.html_escape()
+          |> Phoenix.HTML.safe_to_string()
+
+        "<code>#{code}</code>"
+      else
+        Phoenix.HTML.html_escape(part) |> Phoenix.HTML.safe_to_string()
+      end
+    end)
   end
 
   defp next_lessons_for(profile, lesson) do
