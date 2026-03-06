@@ -130,21 +130,117 @@ const loadMonaco = (() => {
             },
           }],
           [/@[a-z_][\w?!]*/, "annotation"],
+          // Quoted atoms: :"hello" or :'hello'
+          [/:"/, {token: "string.escape", next: "@quotedAtomDouble"}],
+          [/:'/, {token: "string.escape", next: "@quotedAtomSingle"}],
+          // Regular atoms
           [/:\w+/, "string.escape"],
-          [/~[A-Z]?[a-z]?/, "regexp"],
+          // Sigils with heredoc: ~H""", ~s""", etc.
+          [/~[A-Z]?[a-z]?"""/, {token: "regexp", next: "@sigilHeredoc"}],
+          // Sigils with delimiters
+          [/~[A-Z]?[a-z]?\[/, {token: "regexp", next: "@sigilBracket"}],
+          [/~[A-Z]?[a-z]?\(/, {token: "regexp", next: "@sigilParen"}],
+          [/~[A-Z]?[a-z]?\{/, {token: "regexp", next: "@sigilBrace"}],
+          [/~[A-Z]?[a-z]?\//, {token: "regexp", next: "@sigilSlash"}],
+          [/~[A-Z]?[a-z]?</, {token: "regexp", next: "@sigilAngle"}],
+          [/~[A-Z]?[a-z]?\|/, {token: "regexp", next: "@sigilPipe"}],
+          [/~[A-Z]?[a-z]?"/, {token: "regexp", next: "@sigilDoubleQuote"}],
           [/\b0x[\da-fA-F_]+\b/, "number.hex"],
           [/\b\d+(_\d+)*(\.\d+(_\d+)*)?\b/, "number"],
+          // Heredoc strings (triple double-quotes)
+          [/"""/, {token: "string.quote", next: "@heredoc"}],
+          // Regular double-quoted strings
           [/"/, {token: "string.quote", bracket: "@open", next: "@string"}],
+          // Charlists (single-quoted strings)
+          [/'/, {token: "string.quote", next: "@charlist"}],
           [/#.*$/, "comment"],
           [/[{}()[\]]/, "@brackets"],
           [/[<>]=|[=!]=|===|!==|&&|\|\||\|>|<-|->|=>|\\|\+\+|--|<>|\+|-|\*|\/|=/, "operators"],
           [/[,:.]/, "delimiter"],
           [/\s+/, "white"],
         ],
+        // Double-quoted string with interpolation
         string: [
-          [/[^\\"]+/, "string"],
+          [/#\{/, {token: "string.escape", next: "@interpolation"}],
+          [/[^\\#"]+/, "string"],
+          [/#(?!\{)/, "string"],
           [/\\./, "string.escape"],
           [/"/, {token: "string.quote", bracket: "@close", next: "@pop"}],
+        ],
+        // Heredoc strings with interpolation
+        heredoc: [
+          [/#\{/, {token: "string.escape", next: "@interpolation"}],
+          [/"""/, {token: "string.quote", next: "@pop"}],
+          [/#(?!\{)/, "string"],
+          [/\\./, "string.escape"],
+          [/[^\\#"]+/, "string"],
+          [/"(?!"")/, "string"],
+        ],
+        // String interpolation #{...} with nested brace tracking
+        interpolation: [
+          [/\{/, {token: "string.escape", next: "@interpolation"}],
+          [/\}/, {token: "string.escape", next: "@pop"}],
+          [/[A-Z][\w]*/, "type.identifier"],
+          [/[a-z_?!][\w?!]*/, {
+            cases: {
+              "@keywords": "keyword",
+              "@default": "identifier",
+            },
+          }],
+          [/"[^"]*"/, "string"],
+          [/\b\d+\b/, "number"],
+          [/./, ""],
+        ],
+        // Charlists (single-quoted)
+        charlist: [
+          [/[^\\']+/, "string"],
+          [/\\./, "string.escape"],
+          [/'/, {token: "string.quote", next: "@pop"}],
+        ],
+        // Quoted atoms
+        quotedAtomDouble: [
+          [/[^\\"]+/, "string.escape"],
+          [/\\./, "string.escape"],
+          [/"/, {token: "string.escape", next: "@pop"}],
+        ],
+        quotedAtomSingle: [
+          [/[^\\']+/, "string.escape"],
+          [/\\./, "string.escape"],
+          [/'/, {token: "string.escape", next: "@pop"}],
+        ],
+        // Sigil states for each delimiter pair
+        sigilHeredoc: [
+          [/"""/, {token: "regexp", next: "@pop"}],
+          [/[^"]+/, "regexp"],
+          [/"(?!"")/, "regexp"],
+        ],
+        sigilBracket: [
+          [/[^\]]+/, "regexp"],
+          [/\]/, {token: "regexp", next: "@pop"}],
+        ],
+        sigilParen: [
+          [/[^)]+/, "regexp"],
+          [/\)/, {token: "regexp", next: "@pop"}],
+        ],
+        sigilBrace: [
+          [/[^}]+/, "regexp"],
+          [/\}/, {token: "regexp", next: "@pop"}],
+        ],
+        sigilSlash: [
+          [/[^/]+/, "regexp"],
+          [/\//, {token: "regexp", next: "@pop"}],
+        ],
+        sigilAngle: [
+          [/[^>]+/, "regexp"],
+          [/>/, {token: "regexp", next: "@pop"}],
+        ],
+        sigilPipe: [
+          [/[^|]+/, "regexp"],
+          [/\|/, {token: "regexp", next: "@pop"}],
+        ],
+        sigilDoubleQuote: [
+          [/[^"]+/, "regexp"],
+          [/"/, {token: "regexp", next: "@pop"}],
         ],
       },
     })
@@ -155,10 +251,13 @@ const loadMonaco = (() => {
       rules: [
         {token: "keyword", foreground: "DF8F3F", fontStyle: "bold"},
         {token: "string", foreground: "E9C46A"},
+        {token: "string.quote", foreground: "E9C46A"},
+        {token: "string.escape", foreground: "D4A373"},
         {token: "number", foreground: "85B8FF"},
         {token: "comment", foreground: "8A786B", fontStyle: "italic"},
         {token: "type.identifier", foreground: "6CD1B0"},
         {token: "annotation", foreground: "F4A261"},
+        {token: "regexp", foreground: "E76F51"},
       ],
       colors: {
         "editor.background": "#120F0E",
