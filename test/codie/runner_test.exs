@@ -14,6 +14,7 @@ defmodule Codie.RunnerTest do
       })
 
     assert result.status == :pass
+    assert result.returned_value == ~S|"coffee"|
   end
 
   test "rejects blocked APIs" do
@@ -26,6 +27,7 @@ defmodule Codie.RunnerTest do
       })
 
     assert result.status == :rejected_submission
+    assert result.returned_value == nil
   end
 
   test "fails when a lesson check does not pass" do
@@ -38,6 +40,7 @@ defmodule Codie.RunnerTest do
       })
 
     assert result.status == :fail_test
+    assert result.returned_value == "41"
   end
 
   test "returns the targeted failure message for a missed checkpoint" do

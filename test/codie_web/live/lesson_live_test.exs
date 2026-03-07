@@ -43,6 +43,7 @@ defmodule CodieWeb.LessonLiveTest do
     assert render(view) =~ "Every lesson check passed."
     assert has_element?(view, "#lesson-run-feedback")
     assert has_element?(view, "#lesson-result-card")
+    assert has_element?(view, "#lesson-result-returned", ~S|"coffee"|)
     assert has_element?(view, "#lesson-reward-banner")
     assert has_element?(view, "#lesson-result-card .runner-meta-card", "Passed")
     assert has_element?(view, "#lesson-reward-banner .reward-stat-grid")
