@@ -11,7 +11,7 @@ defmodule Codie.Curriculum.Catalog do
         summary:
           "A fresh beginner-first track that teaches core Elixir data types, basic value shapes, and immutability by staying on them until they feel normal.",
         theme: "Coffee Lab",
-        estimated_lesson_count: 32,
+        estimated_lesson_count: 31,
         teaser: "Learn one core datatype at a time, then make immutability feel normal."
       },
       %Track{
@@ -423,6 +423,8 @@ defmodule Codie.Curriculum.Catalog do
 
         Watch out:
         `String.split/2` returns a list, not another string.
+        In Elixir, a function name that ends with `?` usually means it answers a yes-or-no question and returns `true` or `false`.
+        `String.split/2` does not end with `?` because it gives you pieces back instead of a boolean.
 
         Task:
         Split `"latte,mocha"` on the comma and return `["latte", "mocha"]`.
@@ -452,6 +454,10 @@ defmodule Codie.Curriculum.Catalog do
             "Split means break one string into smaller pieces using a separator."
           ),
           quick_term(
+            "Question mark (`?`) in a function name",
+            "When a function name ends with `?`, it usually means the function answers a yes-or-no question and returns `true` or `false`."
+          ),
+          quick_term(
             "Arity notation (`/2`)",
             "`/2` means the function takes 2 arguments. For example, `String.split/2` takes the text and a separator."
           )
@@ -472,7 +478,7 @@ defmodule Codie.Curriculum.Catalog do
         summary: "Ask simple yes-or-no questions about a string.",
         teaching_markdown: """
         What:
-        String predicate functions return booleans, like `String.contains?/2` and `String.starts_with?/2`.
+        Functions that end with `?` are often predicate functions: they ask yes-or-no questions and return booleans. One useful example is `String.contains?/2`.
 
         Example:
         `String.contains?("latte-oat", "-")`
@@ -486,10 +492,12 @@ defmodule Codie.Curriculum.Catalog do
         Check whether a value starts with a known prefix
 
         Watch out:
+        The `?` is part of the function name, so include it when you call the function.
         These functions answer a question about the string, but they do not change the string.
 
         Task:
-        Use both functions on `"latte-oat"` and return `{true, true}`.
+        Use `String.contains?/2` on `"latte-oat"` to check whether it contains `"-"`.
+        Return the boolean result.
         """,
         starter_code: """
         "latte-oat"
@@ -498,21 +506,17 @@ defmodule Codie.Curriculum.Catalog do
         checks: [
           source_contains("String.contains?",
             checkpoint: "Use `String.contains?/2`",
-            failure_message: "Use `String.contains?/2` for the first check."
+            failure_message: "Use `String.contains?/2` to check for the dash."
           ),
-          source_contains("String.starts_with?",
-            checkpoint: "Use `String.starts_with?/2`",
-            failure_message: "Use `String.starts_with?/2` for the second check."
-          ),
-          returns({true, true},
-            checkpoint: "Return `{true, true}`",
-            failure_message: "The final expression should evaluate to `{true, true}`."
+          returns(true,
+            checkpoint: "Return `true`",
+            failure_message: "The final expression should evaluate to `true`."
           )
         ],
         hints: [
           "Check for `\"-\"` in the string.",
-          "Check whether it starts with `\"latte\"`.",
-          "Return both answers in a tuple."
+          "The final line can be a direct call to `String.contains?/2`.",
+          "This lesson only needs one yes-or-no answer."
         ],
         quick_terms: [
           quick_term("Predicate", "A predicate is a function that returns `true` or `false`."),
@@ -538,30 +542,36 @@ defmodule Codie.Curriculum.Catalog do
           "See that making a changed version creates a new value instead of changing the old one.",
         teaching_markdown: """
         What:
-        Elixir data is immutable. That means values do not change in place.
+        Elixir data is immutable. That means a value does not change in place after it exists.
+        You can build a new value from it, but the original value stays the same.
 
         Example:
         `base = "coffee"`
         `updated = base <> " beans"`
+        `"\#{base} -> \#{updated}"` becomes `"coffee -> coffee beans"`
 
         Why:
-        You must internalize that data never changes in place. Variables are just labels that point at values.
+        This is one of Elixir's core ideas. Instead of changing existing data, you keep the old value and build a new one for the next step.
+        Variables are just labels that point at values.
 
         Common cases:
         Keep the original value for one use
         Build a new version for the next step
+        Compare the old value and the new value side by side
 
         Watch out:
-        `base` does not become `"coffee beans"` here. You created a new value and gave it a different label.
+        `base` does not become `"coffee beans"` here.
+        If strings changed in place, both names would show the changed text.
+        Instead, `base` stays `"coffee"` and `updated` is a separate new value.
 
         Task:
         Keep `base = "coffee"`.
         Create `updated = base <> " beans"`.
-        Then return `{base, updated}` so the original and new value are both visible.
+        Then return `"\#{base} -> \#{updated}"` so you can prove the original value stayed `"coffee"` while the new one became `"coffee beans"`.
         """,
         starter_code: """
         base = "coffee"
-        {"", ""}
+        ""
         """,
         prerequisites: ["string-signals"],
         checks: [
@@ -571,25 +581,25 @@ defmodule Codie.Curriculum.Catalog do
             checkpoint: "Build a new string from the old one",
             failure_message: "Use `<>` to build `updated` from `base`."
           ),
-          returns({"coffee", "coffee beans"},
-            checkpoint: "Return both the original and the new value",
+          returns("coffee -> coffee beans",
+            checkpoint: "Return `\"coffee -> coffee beans\"`",
             failure_message:
-              "The final expression should evaluate to `{\"coffee\", \"coffee beans\"}`."
+              "The final expression should evaluate to `\"coffee -> coffee beans\"`."
           )
         ],
         hints: [
-          "Do not change `base`.",
+          "`base` should still be `\"coffee\"` at the end.",
           "Create a new variable named `updated`.",
-          "Return a tuple with `base` first and `updated` second."
+          "Return one string that shows `base` first and `updated` second so you can see both values."
         ],
         quick_terms: [
           quick_term(
             "Immutable",
-            "Immutable means a value does not change in place. You create a new value instead."
+            "Immutable means a value does not change in place. The old value stays the same, and you create a new value instead."
           ),
           quick_term(
             "Label",
-            "A variable name is a label you use to refer to a value."
+            "A variable name is a label you use to refer to a value. Making a new label for a new value does not change the old one."
           )
         ],
         rewards: reward(26, 1, 4, 4, 3, 1),
@@ -741,6 +751,8 @@ defmodule Codie.Curriculum.Catalog do
 
         Watch out:
         Position matters in a tuple. The first and second values are not interchangeable.
+        In the next lesson, `=` will match this tuple shape, like `{drink, cups} = {"latte", 2}`.
+        That does not change the tuple. It checks the shape and pulls the pieces into names.
 
         Task:
         Return the tuple `{"latte", 2}`.
@@ -764,6 +776,10 @@ defmodule Codie.Curriculum.Catalog do
           quick_term(
             "Tuple",
             "A tuple is a small ordered group of values written with curly braces."
+          ),
+          quick_term(
+            "Pattern matching (`=`)",
+            "In Elixir, `=` tries to make the left side match the right side. When the shapes line up, values can be pulled into names."
           )
         ],
         rewards: reward(24, 1, 4, 4, 3, 1),
@@ -778,7 +794,7 @@ defmodule Codie.Curriculum.Catalog do
         summary: "Read values back out of a tuple by unpacking it.",
         teaching_markdown: """
         What:
-        Pattern matching can unpack a tuple into separate variables.
+        In Elixir, `=` does pattern matching. With tuples, that lets you unpack one tuple into separate variables.
 
         Example:
         `{drink, cups} = {"latte", 2}`
@@ -792,6 +808,7 @@ defmodule Codie.Curriculum.Catalog do
         Read two related values returned together
 
         Watch out:
+        `{drink, cups} = order` does not change `order`.
         The shape on the left must match the shape on the right.
 
         Task:
@@ -821,6 +838,10 @@ defmodule Codie.Curriculum.Catalog do
           quick_term(
             "Unpack",
             "Unpack means pull separate values back out of a tuple by matching its shape."
+          ),
+          quick_term(
+            "Pattern matching (`=`)",
+            "`=` is not just storing a value. It checks whether the left side matches the right side, and if it does, names can be filled in."
           )
         ],
         rewards: reward(26, 1, 4, 4, 3, 1),
@@ -1500,6 +1521,7 @@ defmodule Codie.Curriculum.Catalog do
 
         Watch out:
         The first item is the tag that explains how to read the rest of the tuple.
+        In the next lesson, `case` will check whether a value matches shapes like `{:ok, value}` or `{:error, reason}`.
 
         Task:
         Return `{:ok, "latte"}` as the final expression.
@@ -1542,6 +1564,7 @@ defmodule Codie.Curriculum.Catalog do
         teaching_markdown: """
         What:
         `case` checks one value against multiple patterns and runs the first matching branch.
+        Each branch is asking, "Does the value match this shape?"
 
         Example:
         `case result do`
@@ -1557,6 +1580,7 @@ defmodule Codie.Curriculum.Catalog do
         Return a fallback for an error tuple
 
         Watch out:
+        A branch like `{:ok, value} -> ...` only runs when the value matches that tuple shape.
         Branches are checked from top to bottom, so put the specific matches first.
 
         Task:
@@ -3563,32 +3587,34 @@ defmodule Codie.Curriculum.Catalog do
         `with` chains pattern matches and runs the success path top-to-bottom.
 
         Example:
-        `with {count, ""} <- Integer.parse(raw),`
-        `     true <- count > 0 do`
-        `  {:ok, count}`
+        `with {:ok, drink} <- drink_result,`
+        `     {:ok, cups} <- cups_result do`
+        `  {:ok, "\#{drink}:\#{cups}"}`
         `else`
         `  _ -> {:error, :invalid}`
         `end`
 
         Why:
-        `with` is the idiomatic way to handle happy-path chains that might fail, without messy nested conditionals.
+        `with` is the readable way to say, “do step one, then step two, and only keep going if each step matches.”
 
         Common cases:
-        Parse and validate user input step by step
         Chain multiple `{:ok, value}`-style checks
+        Stop early and go to `else` when one step does not match
 
         Watch out:
-        Keep each step simple and use `else` for non-happy-path outcomes.
+        Keep the first `with` lessons simple.
+        Each `<-` step checks whether the value matches the shape on the left.
 
         Task:
-        Keep `raw = "4"`.
+        Keep `drink_result = {:ok, "latte"}` and `cups_result = {:ok, 2}`.
         Use `with` to:
-        - parse it with `Integer.parse/1`
-        - require `count > 0`
-        Return `{:ok, count}` on success, otherwise `{:error, :invalid}`.
+        - match `{:ok, drink}` from `drink_result`
+        - match `{:ok, cups}` from `cups_result`
+        Return `{:ok, "\#{drink}:\#{cups}"}` on success, otherwise `{:error, :invalid}`.
         """,
         starter_code: """
-        raw = "4"
+        drink_result = {:ok, "latte"}
+        cups_result = {:ok, 2}
         {:error, :invalid}
         """,
         prerequisites: ["control-flow-cond"],
@@ -3601,29 +3627,37 @@ defmodule Codie.Curriculum.Catalog do
             checkpoint: "Chain at least one match step",
             failure_message: "Use `<-` steps inside `with`."
           ),
-          source_contains("Integer.parse(raw)",
-            checkpoint: "Parse the input in the chain",
-            failure_message: "Use `Integer.parse(raw)` as one `with` step."
+          source_contains("{:ok, drink} <- drink_result",
+            checkpoint: "Match the drink step in the chain",
+            failure_message: "Match the first step with `{:ok, drink} <- drink_result`."
+          ),
+          source_contains("{:ok, cups} <- cups_result",
+            checkpoint: "Match the cups step in the chain",
+            failure_message: "Match the second step with `{:ok, cups} <- cups_result`."
           ),
           source_contains("else",
             checkpoint: "Handle non-happy-path outcomes",
             failure_message: "Add an `else` branch for invalid input."
           ),
-          returns({:ok, 4},
-            checkpoint: "Return `{:ok, 4}`",
+          returns({:ok, "latte:2"},
+            checkpoint: "Return `{:ok, \"latte:2\"}`",
             failure_message:
-              "With `raw = \"4\"`, the final expression should evaluate to `{:ok, 4}`."
+              "With the provided inputs, the final expression should evaluate to `{:ok, \"latte:2\"}`."
           )
         ],
         hints: [
           "Start with `with ... do` and end with `else` + `end`.",
-          "Use `{count, \"\"} <- Integer.parse(raw)`.",
-          "Return `{:ok, count}` in the do-block."
+          "Match `{:ok, drink}` first, then `{:ok, cups}`.",
+          "Return `{:ok, \"\#{drink}:\#{cups}\"}` in the do-block."
         ],
         quick_terms: [
           quick_term(
             "Happy path",
             "The happy path is the main successful flow when each step works."
+          ),
+          quick_term(
+            "Match step (`<-`)",
+            "A `with` match step keeps going only when the value on the right matches the pattern on the left."
           )
         ],
         rewards: reward(36, 1, 5, 4, 3, 1),
@@ -4305,6 +4339,7 @@ defmodule Codie.Curriculum.Catalog do
 
         Why:
         This is how Elixir treats functions as normal building blocks you can pass around and reuse.
+        This starts a short final chapter of practical tools: function values, structured data, debugging, and ranges.
 
         Common cases:
         Keep a tiny formatter in a variable
@@ -4498,129 +4533,75 @@ defmodule Codie.Curriculum.Catalog do
       ),
       lesson(
         track_slug: "foundations",
-        slug: "charlist-lane-new",
-        title: "Charlist Lane",
-        summary: "See the difference between a string and a charlist without guessing.",
+        slug: "inspect-sip-new",
+        title: "Inspect Sip",
+        summary: "Use `IO.inspect/2` to peek at a value without changing the result.",
         teaching_markdown: """
         What:
-        A string uses double quotes. A charlist is a list of character codes and is best written with `~c"..."`.
+        `IO.inspect/2` prints a value and then returns that same value.
 
         Example:
-        `"latte"`
-        `~c"latte"`
+        `drink = IO.inspect("latte", label: "drink")`
 
         Why:
-        Beginners often assume all quoted text means the same thing. In Elixir, strings and charlists are different values.
+        This is one of the highest-payoff beginner tools because it lets you see your data while keeping the code working.
 
         Common cases:
-        Read library output that shows a charlist
-        Notice why a charlist behaves like a list in some places
+        Check what a value looks like while you are learning
+        Confirm a value before the final step in a small flow
 
         Watch out:
-        `~c"latte"` is not the same type as `"latte"`.
+        `IO.inspect/2` is for debugging. The value still keeps flowing through your code.
 
         Task:
-        Bind `text = "latte"` and `letters = ~c"latte"`.
-        Then return `{text, length(letters)}` so you can see the string and also treat the charlist like a list.
+        Keep `drink = "latte"`.
+        Inspect it with the label `"drink"`.
+        Then return `drink <> " ready"` so the final value is `"latte ready"`.
         """,
         starter_code: """
-        text = ""
-        letters = ~c""
-        {"", 0}
+        drink = "latte"
+        "todo"
         """,
         prerequisites: ["struct-shelf-new"],
         checks: [
-          binds(:text, "latte"),
-          binds(:letters, ~c"latte"),
-          source_contains("length(",
-            checkpoint: "Count the charlist like a list",
-            failure_message: "Use `length(letters)` to count the items in the charlist."
+          source_contains("IO.inspect",
+            checkpoint: "Inspect the value with `IO.inspect/2`",
+            failure_message: "Use `IO.inspect/2` to inspect `drink`."
           ),
-          returns({"latte", 5},
-            checkpoint: "Return `{\"latte\", 5}`",
-            failure_message: "The final expression should evaluate to `{\"latte\", 5}`."
+          source_contains("label: \"drink\"",
+            checkpoint: "Pass the label `\"drink\"`",
+            failure_message: "Pass `label: \"drink\"` when inspecting the value."
+          ),
+          source_contains("<>",
+            checkpoint: "Keep using the inspected value",
+            failure_message: "Build the final answer from `drink` after inspecting it."
+          ),
+          returns("latte ready",
+            checkpoint: "Return `\"latte ready\"`",
+            failure_message: "The final expression should evaluate to `\"latte ready\"`."
           )
         ],
         hints: [
-          "Use double quotes for `text`.",
-          "Use `~c\"latte\"` for `letters`.",
-          "A charlist can be counted with `length/1`."
+          "Inspect the same `drink` value instead of replacing it.",
+          "Use `IO.inspect(drink, label: \"drink\")`.",
+          "The final line can still build from `drink`."
         ],
         quick_terms: [
           quick_term(
-            "Charlist",
-            "A charlist is a list of character codes, usually written as `~c\"...\"`."
+            "Debugging",
+            "Debugging means checking what your code is doing right now so you can understand the value you have."
+          ),
+          quick_term(
+            "IO.inspect",
+            "`IO.inspect/2` prints a value and returns that same value, which makes it useful for quick debugging."
           )
         ],
         rewards: reward(28, 1, 4, 4, 3, 1),
         codex_entries_unlocked: [
           codex(
-            "charlists-new",
-            "Charlists",
-            "Charlists are best written with `~c\"...\"` and behave like lists of character codes."
-          )
-        ]
-      ),
-      lesson(
-        track_slug: "foundations",
-        slug: "sigil-shelf",
-        title: "Sigil Shelf",
-        summary: "Use `~w()` to create a list of strings quickly.",
-        teaching_markdown: """
-        What:
-        Sigils are shortcuts that start with `~` and create common values. A beginner-friendly one is `~w()`, which makes a list of strings.
-
-        Example:
-        `~w(latte mocha)`
-
-        Why:
-        Sigils reduce boilerplate. A word list sigil saves you from writing quotes and commas for each item.
-
-        Common cases:
-        Create a list of words quickly with `~w()`
-        Count or inspect the generated list right away
-
-        Watch out:
-        `~w()` returns a list of strings by default. Add `a` for atoms: `~w(latte mocha)a`.
-
-        Task:
-        Use `~w` to build two drink names and return the result of `length(...)` so the final value is `2`.
-        """,
-        starter_code: """
-        0
-        """,
-        prerequisites: ["charlist-lane-new"],
-        checks: [
-          source_contains("~w",
-            checkpoint: "Use the `~w` sigil",
-            failure_message: "Use `~w(latte mocha)` to create the word list."
-          ),
-          source_contains("length(",
-            checkpoint: "Count the generated list with `length/1`",
-            failure_message: "Wrap the sigil in `length(...)`."
-          ),
-          returns(2,
-            checkpoint: "Return `2`",
-            failure_message: "The final expression should evaluate to `2`."
-          )
-        ],
-        hints: [
-          "Write `length(~w(latte mocha))` directly if you want the shortest answer.",
-          "`~w(...)` creates a list of strings automatically.",
-          "The final value should be the number `2`."
-        ],
-        quick_terms: [
-          quick_term(
-            "Sigil",
-            "A sigil is a `~` shortcut that builds common values like word lists, strings, or regexes."
-          )
-        ],
-        rewards: reward(28, 1, 4, 4, 3, 1),
-        codex_entries_unlocked: [
-          codex(
-            "sigils",
-            "Sigils",
-            "Use sigils like `~w()`, `~s()`, and `~r()` to create values with less boilerplate."
+            "io-inspect-new",
+            "IO.inspect",
+            "Use `IO.inspect/2` to print a value while keeping it available for the next step."
           )
         ]
       ),
@@ -4655,7 +4636,7 @@ defmodule Codie.Curriculum.Catalog do
         steps = 0..0
         {0, 0}
         """,
-        prerequisites: ["sigil-shelf"],
+        prerequisites: ["inspect-sip-new"],
         checks: [
           binds(:steps, 1..3),
           source_contains("steps.first",
@@ -4699,40 +4680,38 @@ defmodule Codie.Curriculum.Catalog do
         summary: "Use the new value tools together after learning them one at a time.",
         teaching_markdown: """
         What:
-        This checkpoint combines function values, structs, charlists, and ranges after each one was introduced on its own.
+        This checkpoint combines structs, debugging, and ranges after each one was introduced on its own.
 
         Example:
-        `label = fn n -> "step " <> Integer.to_string(n) end`
-        `struct(Walk, label: label.(1), span: 1..3)`
+        `walk = struct(Walk, label: "step 1", span: 1..3)`
+        `IO.inspect(walk, label: "walk")`
 
         Why:
-        New value types feel much more solid once you can use them together in one small piece of code.
+        This final chapter should feel practical. You build a value, inspect it, and keep using it in one readable flow.
 
         Common cases:
-        Use a small function to build one value
         Keep structured data in a struct
-        Read a range and count a charlist
+        Inspect a value without changing the result
+        Read a range clearly from the same struct
 
         Watch out:
-        Keep the job of each piece small. Build the function, then the struct, then the final tuple.
+        Keep the job of each piece small. Build the struct, inspect it, then return the final tuple.
 
         Task:
         Define `CodiePlayground.Walk` with `defstruct label: "", span: 1..1`.
-        Bind `label = fn n -> "step " <> Integer.to_string(n) end`.
-        Bind `letters = ~c"brew"`.
-        Build `walk = struct(CodiePlayground.Walk, label: label.(1), span: 1..3)`.
-        Then return `{walk.label, walk.span.last, length(letters)}`.
+        Build `walk = struct(CodiePlayground.Walk, label: "step 1", span: 1..3)`.
+        Inspect it with `IO.inspect(walk, label: "walk")`.
+        Then return `{walk.label, walk.span.last}`.
 
-        The final expression should return `{"step 1", 3, 4}`.
+        The final expression should return `{"step 1", 3}`.
         """,
         starter_code: """
         defmodule CodiePlayground.Walk do
           defstruct label: "", span: 1..1
         end
 
-        label = fn n -> "step " <> Integer.to_string(n) end
-        letters = ~c"brew"
-        {"", 0, 0}
+        walk = struct(CodiePlayground.Walk, label: "", span: 0..0)
+        {"", 0}
         """,
         prerequisites: ["range-shelf-new"],
         checks: [
@@ -4740,27 +4719,27 @@ defmodule Codie.Curriculum.Catalog do
             checkpoint: "Keep the struct definition",
             failure_message: "Keep the `defstruct` definition for `CodiePlayground.Walk`."
           ),
-          source_contains("fn",
-            checkpoint: "Keep the function value",
-            failure_message: "Keep the anonymous function for `label`."
-          ),
           source_contains("struct(CodiePlayground.Walk",
             checkpoint: "Build the struct value",
             failure_message: "Build the struct with `struct(CodiePlayground.Walk, ...)`."
           ),
-          source_contains("length(",
-            checkpoint: "Count the charlist",
-            failure_message: "Use `length(letters)` to count the charlist."
+          source_contains("IO.inspect",
+            checkpoint: "Inspect the struct value",
+            failure_message: "Use `IO.inspect/2` on `walk` before the final expression."
           ),
-          returns({"step 1", 3, 4},
-            checkpoint: "Return `{\"step 1\", 3, 4}`",
-            failure_message: "The final expression should evaluate to `{\"step 1\", 3, 4}`."
+          source_contains("label: \"walk\"",
+            checkpoint: "Pass the label `\"walk\"`",
+            failure_message: "Pass `label: \"walk\"` when inspecting `walk`."
+          ),
+          returns({"step 1", 3},
+            checkpoint: "Return `{\"step 1\", 3}`",
+            failure_message: "The final expression should evaluate to `{\"step 1\", 3}`."
           )
         ],
         hints: [
           "Bind `walk` before the final expression.",
-          "Use `label.(1)` when building the struct.",
-          "Read `walk.span.last` and count `letters` with `length/1`."
+          "Set the struct label to `\"step 1\"` and the span to `1..3`.",
+          "Inspect `walk` before reading from it in the final tuple."
         ],
         quick_terms: [
           quick_term(
