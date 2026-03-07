@@ -113,7 +113,7 @@ defmodule Codie.RunnerTest do
         code: """
         base = "coffee"
         updated = base <> " beans"
-        {base, updated}
+        base <> " -> " <> updated
         """,
         profile_id: 1,
         attempt_number: 1
@@ -273,14 +273,14 @@ defmodule Codie.RunnerTest do
     assert result.status == :pass
   end
 
-  test "passes the new foundations charlist lesson" do
+  test "passes the new foundations inspect lesson" do
     result =
       Runner.submit(%Submission{
-        lesson_slug: "charlist-lane-new",
+        lesson_slug: "inspect-sip-new",
         code: """
-        text = "latte"
-        letters = ~c"latte"
-        {text, length(letters)}
+        drink = "latte"
+        IO.inspect(drink, label: "drink")
+        drink <> " ready"
         """,
         profile_id: 1,
         attempt_number: 1
@@ -313,10 +313,9 @@ defmodule Codie.RunnerTest do
           defstruct label: "", span: 1..1
         end
 
-        label = fn n -> "step " <> Integer.to_string(n) end
-        letters = ~c"brew"
-        walk = struct(CodiePlayground.Walk, label: label.(1), span: 1..3)
-        {walk.label, walk.span.last, length(letters)}
+        walk = struct(CodiePlayground.Walk, label: "step 1", span: 1..3)
+        IO.inspect(walk, label: "walk")
+        {walk.label, walk.span.last}
         """,
         profile_id: 1,
         attempt_number: 1
@@ -666,11 +665,12 @@ defmodule Codie.RunnerTest do
       Runner.submit(%Submission{
         lesson_slug: "control-flow-with",
         code: """
-        raw = "4"
+        drink_result = {:ok, "latte"}
+        cups_result = {:ok, 2}
 
-        with {count, ""} <- Integer.parse(raw),
-             true <- count > 0 do
-          {:ok, count}
+        with {:ok, drink} <- drink_result,
+             {:ok, cups} <- cups_result do
+          {:ok, drink <> ":" <> Integer.to_string(cups)}
         else
           _ -> {:error, :invalid}
         end

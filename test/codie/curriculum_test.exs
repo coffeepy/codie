@@ -182,10 +182,11 @@ defmodule Codie.CurriculumTest do
     assert "function-shelf-new" in slugs
     assert "function-choices-new" in slugs
     assert "struct-shelf-new" in slugs
-    assert "charlist-lane-new" in slugs
+    assert "inspect-sip-new" in slugs
     assert "range-shelf-new" in slugs
     assert "value-tools-roundup" in slugs
 
+    refute "charlist-lane-new" in slugs
     refute "stream-flow" in slugs
     refute "catch-spill" in slugs
     refute "script-path" in slugs
@@ -327,7 +328,7 @@ defmodule Codie.CurriculumTest do
           "function-shelf-new",
           "function-choices-new",
           "struct-shelf-new",
-          "charlist-lane-new",
+          "inspect-sip-new",
           "range-shelf-new",
           "value-tools-roundup",
           "data-shapes-lists-tuples",
@@ -375,7 +376,7 @@ defmodule Codie.CurriculumTest do
           "function-shelf-new",
           "function-choices-new",
           "struct-shelf-new",
-          "charlist-lane-new",
+          "inspect-sip-new",
           "range-shelf-new",
           "value-tools-roundup",
           "data-shapes-lists-tuples",
