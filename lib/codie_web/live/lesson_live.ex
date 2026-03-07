@@ -331,6 +331,18 @@ defmodule CodieWeb.LessonLive do
               <p>{@latest_result.compile_output}</p>
             </div>
 
+            <div
+              :if={@latest_result.returned_value}
+              id="lesson-result-returned"
+              class="runner-log-shell"
+            >
+              <div class="runner-log-heading">
+                <span class="runner-log-label">Returned</span>
+                <span class="muted-copy">Evaluated result</span>
+              </div>
+              <pre class="runner-log">{@latest_result.returned_value}</pre>
+            </div>
+
             <div :if={@latest_result.annotations != []} class="runner-annotation-list">
               <span class="runner-annotation-label">Focus next</span>
               <p :for={annotation <- @latest_result.annotations} class="runner-annotation">

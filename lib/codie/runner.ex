@@ -40,6 +40,7 @@ defmodule Codie.Runner do
             status: :pass,
             compile_output: "Compiled cleanly.",
             test_output: "Every lesson check passed.",
+            returned_value: format_return_value(execution.value),
             runtime_ms: elapsed(started_at),
             summary: "Nice work. Codie stays caffeinated.",
             annotations: [],
@@ -51,6 +52,7 @@ defmodule Codie.Runner do
             status: :fail_test,
             compile_output: "The code compiled, but a lesson check failed.",
             test_output: check.failure_message,
+            returned_value: format_return_value(execution.value),
             runtime_ms: elapsed(started_at),
             summary: "Close, but one of the lesson checks still failed.",
             annotations: [check.label],
@@ -63,6 +65,7 @@ defmodule Codie.Runner do
           status: :rejected_submission,
           compile_output: message,
           test_output: "Submissions run locally, so obviously risky APIs are blocked.",
+          returned_value: nil,
           runtime_ms: elapsed(started_at),
           summary: "That code uses APIs that are blocked in Codie.",
           annotations: [message],
@@ -74,6 +77,7 @@ defmodule Codie.Runner do
           status: :fail_compile,
           compile_output: error,
           test_output: "Fix the syntax issue and try again.",
+          returned_value: nil,
           runtime_ms: elapsed(started_at),
           summary: "Elixir could not parse the submission.",
           annotations: [error],
@@ -85,6 +89,7 @@ defmodule Codie.Runner do
           status: :runtime_error,
           compile_output: "Code compiled, but raised during execution.",
           test_output: error,
+          returned_value: nil,
           runtime_ms: elapsed(started_at),
           summary: "The code ran, but crashed before it satisfied the lesson.",
           annotations: [error],
@@ -96,6 +101,7 @@ defmodule Codie.Runner do
           status: :timeout,
           compile_output: "The submission exceeded the lesson time limit.",
           test_output: message,
+          returned_value: nil,
           runtime_ms: @timeout_ms,
           summary: "That run took too long.",
           annotations: [message],
@@ -107,6 +113,7 @@ defmodule Codie.Runner do
           status: :runner_error,
           compile_output: "The runner hit an internal error.",
           test_output: message,
+          returned_value: nil,
           runtime_ms: elapsed(started_at),
           summary: "Codie's checker tripped on its own shoelaces.",
           annotations: [message],
@@ -119,6 +126,7 @@ defmodule Codie.Runner do
         status: :runner_error,
         compile_output: "Unexpected runner failure.",
         test_output: Exception.message(error),
+        returned_value: nil,
         runtime_ms: 0,
         summary: "Codie's runner crashed unexpectedly.",
         annotations: [Exception.message(error)],
@@ -131,6 +139,10 @@ defmodule Codie.Runner do
   end
 
   def normalize_result(%Result{} = result), do: result
+
+  defp format_return_value(value) do
+    inspect(value, pretty: true, limit: :infinity, printable_limit: :infinity)
+  end
 
   defp reject_if_unsafe(code) do
     case Enum.find(@blocked_tokens, &String.contains?(code, &1)) do
