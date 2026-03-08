@@ -40,7 +40,7 @@ defmodule CodieWeb.LessonLiveTest do
     assert Progress.draft_for(profile, lesson.slug, "") == lesson.starter_code
   end
 
-  test "submitting a valid caffeine reward keeps the coffee celebration scoped to the reward banner",
+  test "submitting a valid caffeine reward keeps the coffee celebration in the reward banner while the top rail avatar stays visible",
        %{
          conn: conn
        } do
@@ -97,7 +97,15 @@ defmodule CodieWeb.LessonLiveTest do
                   has_element?(view, "#lesson-reward-board-sprite-even"))
            end)
 
-    refute has_element?(view, ".lesson-workspace-rail #lesson-workspace-companion")
+    assert has_element?(
+             view,
+             ".lesson-workspace-rail #lesson-workspace-companion[data-companion-placement='rail']"
+           )
+
+    refute has_element?(
+             view,
+             ".lesson-workspace-rail #lesson-workspace-companion[data-codie-state='caffeine_gain']"
+           )
 
     assert has_element?(view, "#lesson-reward-banner")
     assert has_element?(view, "#lesson-reward-banner .reward-actions .secondary-cta")
@@ -120,7 +128,7 @@ defmodule CodieWeb.LessonLiveTest do
            )
   end
 
-  test "re-passing an already cleared lesson keeps a single non-caffeine success companion in the reward banner",
+  test "re-passing an already cleared lesson keeps the top rail avatar visible alongside the reward banner companion",
        %{conn: conn} do
     profile = Progress.get_or_create_profile()
     lesson = Curriculum.get_lesson!("wake_codie")
@@ -147,7 +155,10 @@ defmodule CodieWeb.LessonLiveTest do
     assert has_element?(view, "#lesson-reward-banner #lesson-reward-companion")
     refute has_element?(view, "#lesson-reward-banner .lesson-workspace-companion-pop")
 
-    refute has_element?(view, ".lesson-workspace-rail #lesson-workspace-companion")
+    assert has_element?(
+             view,
+             ".lesson-workspace-rail #lesson-workspace-companion[data-companion-placement='rail'][data-codie-state='lesson_passed'][data-codie-tone='mint'][data-codie-emotion='proud'][data-codie-sprite='proud']"
+           )
 
     assert has_element?(
              view,

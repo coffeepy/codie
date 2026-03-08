@@ -597,7 +597,7 @@ defmodule CodieWeb.LessonLive do
             </div>
           </div>
 
-          <div :if={is_nil(@reward_result)} class="lesson-workspace-rail">
+          <div class="lesson-workspace-rail">
             <CodieWeb.LessonCompanion.lesson_companion
               profile={@profile}
               latest_result={@latest_result}
