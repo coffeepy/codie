@@ -7,6 +7,7 @@ defmodule CodieWeb.LessonLive do
   alias Codie.Runner.Submission
 
   @hint_focus_cost 2
+  @companion_reaction_ms 700
 
   @impl true
   def mount(_params, _session, socket) do
@@ -27,6 +28,8 @@ defmodule CodieWeb.LessonLive do
        hint_index: 0,
        latest_result: nil,
        reward_result: nil,
+       companion_trigger: nil,
+       companion_reaction_token: 0,
        next_lesson: nil,
        next_lessons: [],
        run_state: :idle,
@@ -48,7 +51,7 @@ defmodule CodieWeb.LessonLive do
   def handle_event("save_draft", %{"code" => code}, socket) when is_binary(code) do
     {:ok, _} = Progress.save_draft(socket.assigns.profile, socket.assigns.lesson.slug, code)
 
-    {:noreply, socket}
+    {:noreply, maybe_clear_failed_companion_reaction(socket)}
   end
 
   def handle_event("reset_starter", _params, socket) do
@@ -60,7 +63,9 @@ defmodule CodieWeb.LessonLive do
       )
 
     {:noreply,
-     assign(socket,
+     socket
+     |> clear_companion_reaction()
+     |> assign(
        draft_code: socket.assigns.lesson.starter_code,
        editor_version: next_editor_version(socket),
        latest_result: nil,
@@ -77,10 +82,12 @@ defmodule CodieWeb.LessonLive do
         {:ok, profile} = Progress.spend_focus(socket.assigns.profile, @hint_focus_cost)
 
         {:noreply,
-         assign(socket,
+         socket
+         |> assign(
            profile: profile,
            hint_index: socket.assigns.hint_index + 1
-         )}
+         )
+         |> trigger_companion_reaction(:hint_used)}
     end
   end
 
@@ -122,7 +129,9 @@ defmodule CodieWeb.LessonLive do
       end)
 
     {:noreply,
-     assign(socket,
+     socket
+     |> clear_companion_reaction()
+     |> assign(
        draft_code: code,
        active_run_id: run_id,
        run_state: :running,
@@ -155,20 +164,46 @@ defmodule CodieWeb.LessonLive do
         {:ok, profile, reward_result} =
           Progress.mark_lesson_passed(socket.assigns.profile, socket.assigns.lesson, code)
 
-        {:noreply,
-         socket
-         |> assign(profile: profile)
-         |> assign(active_run_id: nil)
-         |> assign_result_state(result, reward_result)
-         |> refresh_progress()}
+        socket =
+          socket
+          |> assign(profile: profile)
+          |> assign(active_run_id: nil)
+          |> assign_result_state(result, reward_result)
+          |> trigger_companion_reaction(companion_trigger_for_reward(reward_result))
+          |> refresh_progress()
+
+        socket =
+          if caffeine_reward?(reward_result) do
+            socket
+          else
+            push_event(socket, "lesson-focus-success-reward", %{target_id: "lesson-reward-banner"})
+          end
+
+        {:noreply, socket}
 
       _ ->
-        {:noreply,
-         socket
-         |> assign(active_run_id: nil)
-         |> assign_result_state(result, nil)
-         |> refresh_progress()}
+        socket =
+          socket
+          |> assign(active_run_id: nil)
+          |> assign_result_state(result, nil)
+          |> trigger_companion_reaction(:mistake_or_failed_run)
+          |> refresh_progress()
+          |> push_event("lesson-focus-failure-feedback", %{target_id: "lesson-failure-banner"})
+
+        {:noreply, socket}
     end
+  end
+
+  @impl true
+  def handle_info(
+        {:clear_companion_reaction, reaction_token},
+        %{assigns: %{companion_reaction_token: reaction_token}} = socket
+      ) do
+    {:noreply, assign(socket, :companion_trigger, nil)}
+  end
+
+  def handle_info({:clear_companion_reaction, _reaction_token}, socket) do
+    {:noreply, socket}
   end
 
   def handle_info({:run_submission_complete, _run_id, _code, _result}, socket) do
@@ -243,188 +278,333 @@ defmodule CodieWeb.LessonLive do
       </div>
 
       <div class="glass-panel editor-panel">
-        <div class="editor-topline">
-          <div>
-            <p class="eyebrow">Workspace</p>
-            <h2>Type real Elixir</h2>
-          </div>
-          <span :if={@run_state == :running} class="status-pill status-progress">Checking...</span>
-        </div>
-
-        <.form
-          for={%{}}
-          as={:submission}
-          phx-submit="run_submission"
-          class="editor-shell"
-        >
-          <div
-            id="lesson-editor"
-            phx-hook="CodeEditor"
-            class="code-editor-frame"
-            data-editor-value={@draft_code}
-            data-editor-version={@editor_version}
-          >
-            <textarea
-              id="lesson-code-input"
-              name="submission[code]"
-              data-role="editor-input"
-              class="editor-sync-input"
-              tabindex="-1"
-              aria-hidden="true"
-              readonly
-            ><%= @draft_code %></textarea>
-            <div
-              id="lesson-editor-surface"
-              data-role="editor-surface"
-              phx-update="ignore"
-              class="code-editor-surface"
-            >
-            </div>
-            <div
-              id="lesson-editor-vim-status"
-              data-role="vim-status"
-              class="vim-status-bar"
-              phx-update="ignore"
-            >
-            </div>
-          </div>
-
-          <div class="editor-actions">
-            <button type="button" phx-click="reset_starter" class="secondary-cta">
-              Reset Starter
-            </button>
-            <button type="submit" class="primary-cta" disabled={@run_state == :running}>
-              Run Lesson
-            </button>
-          </div>
-        </.form>
-
-        <div :if={@latest_result || @reward_result} id="lesson-run-feedback" class="post-run-stack">
-          <div
-            :if={@latest_result}
-            id="lesson-result-card"
-            class={result_card_class(@latest_result.status)}
-          >
-            <div class="runner-summary-row">
-              <div class="section-heading">
-                <p class="eyebrow">Runner</p>
-                <h3>{@latest_result.summary}</h3>
+        <div class="lesson-workspace-layout" data-layout-mode="overlay">
+          <div class="lesson-workspace-main">
+            <div class="editor-topline">
+              <div>
+                <p class="eyebrow">Workspace</p>
+                <h2>Type real Elixir</h2>
               </div>
-              <span class={result_status_pill_class(@latest_result.status)}>
-                {human_result(@latest_result.status)}
+              <span :if={@run_state == :running} class="status-pill status-progress">
+                Checking...
               </span>
             </div>
 
-            <div class="runner-meta-grid">
-              <div class="runner-meta-card">
-                <span>Run status</span>
-                <strong>{human_result(@latest_result.status)}</strong>
+            <.form
+              for={%{}}
+              as={:submission}
+              phx-submit="run_submission"
+              class="editor-shell"
+            >
+              <div
+                id="lesson-editor"
+                phx-hook="CodeEditor"
+                class="code-editor-frame"
+                data-editor-value={@draft_code}
+                data-editor-version={@editor_version}
+              >
+                <textarea
+                  id="lesson-code-input"
+                  name="submission[code]"
+                  data-role="editor-input"
+                  class="editor-sync-input"
+                  tabindex="-1"
+                  aria-hidden="true"
+                  readonly
+                ><%= @draft_code %></textarea>
+                <div
+                  id="lesson-editor-surface"
+                  data-role="editor-surface"
+                  phx-update="ignore"
+                  class="code-editor-surface"
+                >
+                </div>
+                <div
+                  id="lesson-editor-vim-status"
+                  data-role="vim-status"
+                  class="vim-status-bar"
+                  phx-update="ignore"
+                >
+                </div>
               </div>
-              <div class="runner-meta-card">
-                <span>Runtime</span>
-                <strong>{@latest_result.runtime_ms}ms</strong>
-              </div>
-            </div>
 
-            <div class="runner-copy-block">
-              <span>Compile</span>
-              <p>{@latest_result.compile_output}</p>
-            </div>
+              <div class="editor-actions">
+                <button type="button" phx-click="reset_starter" class="secondary-cta">
+                  Reset Starter
+                </button>
+                <button type="submit" class="primary-cta" disabled={@run_state == :running}>
+                  Run Lesson
+                </button>
+              </div>
+            </.form>
 
             <div
-              :if={@latest_result.returned_value}
-              id="lesson-result-returned"
-              class="runner-log-shell"
+              :if={@latest_result || @reward_result}
+              id="lesson-run-feedback"
+              class="post-run-stack"
             >
-              <div class="runner-log-heading">
-                <span class="runner-log-label">Returned</span>
-                <span class="muted-copy">Evaluated result</span>
-              </div>
-              <pre class="runner-log">{@latest_result.returned_value}</pre>
-            </div>
+              <div
+                :if={@latest_result}
+                id="lesson-result-card"
+                class={result_card_class(@latest_result.status)}
+              >
+                <div class="runner-summary-row">
+                  <div class="section-heading">
+                    <p class="eyebrow">Runner</p>
+                    <h3>{@latest_result.summary}</h3>
+                  </div>
+                  <span class={result_status_pill_class(@latest_result.status)}>
+                    {human_result(@latest_result.status)}
+                  </span>
+                </div>
 
-            <div :if={@latest_result.annotations != []} class="runner-annotation-list">
-              <span class="runner-annotation-label">Focus next</span>
-              <p :for={annotation <- @latest_result.annotations} class="runner-annotation">
-                {annotation}
-              </p>
-            </div>
+                <div class="runner-meta-grid">
+                  <div class="runner-meta-card">
+                    <span>Run status</span>
+                    <strong>{human_result(@latest_result.status)}</strong>
+                  </div>
+                  <div class="runner-meta-card">
+                    <span>Runtime</span>
+                    <strong>{@latest_result.runtime_ms}ms</strong>
+                  </div>
+                </div>
 
-            <div class="runner-log-shell">
-              <div class="runner-log-heading">
-                <span class="runner-log-label">Runner notes</span>
-                <span class="muted-copy">Latest output</span>
+                <div class="runner-copy-block">
+                  <span>Compile</span>
+                  <p>{@latest_result.compile_output}</p>
+                </div>
+
+                <div
+                  :if={@latest_result.returned_value}
+                  id="lesson-result-returned"
+                  class="runner-log-shell"
+                >
+                  <div class="runner-log-heading">
+                    <span class="runner-log-label">Returned</span>
+                    <span class="muted-copy">Evaluated result</span>
+                  </div>
+                  <pre class="runner-log">{@latest_result.returned_value}</pre>
+                </div>
+
+                <div :if={@latest_result.annotations != []} class="runner-annotation-list">
+                  <span class="runner-annotation-label">Focus next</span>
+                  <p :for={annotation <- @latest_result.annotations} class="runner-annotation">
+                    {annotation}
+                  </p>
+                </div>
+
+                <div class="runner-log-shell">
+                  <div class="runner-log-heading">
+                    <span class="runner-log-label">Runner notes</span>
+                    <span class="muted-copy">Latest output</span>
+                  </div>
+                  <pre class="runner-log">{@latest_result.test_output}</pre>
+                </div>
               </div>
-              <pre class="runner-log">{@latest_result.test_output}</pre>
+
+              <div
+                :if={failed_reward_preview(@latest_result)}
+                id="lesson-failure-banner"
+                class="failure-banner"
+              >
+                <div class="failure-hero">
+                  <div class="failure-header">
+                    <div class="section-heading">
+                      <p class="eyebrow">Attempt outcome</p>
+                      <h3>No rewards banked yet</h3>
+                    </div>
+                    <p class="failure-summary">
+                      This run keeps the lesson in progress, so the reward payout is still on the
+                      table for the next clear pass.
+                    </p>
+                  </div>
+
+                  <CodieWeb.LessonCompanion.lesson_companion
+                    :if={@companion_trigger == :mistake_or_failed_run}
+                    profile={@profile}
+                    latest_result={@latest_result}
+                    trigger={@companion_trigger}
+                    reaction_token={@companion_reaction_token}
+                    placement={:feedback}
+                    show_pop={false}
+                    dom_id="lesson-failure"
+                  />
+                </div>
+
+                <div class="reward-stat-grid">
+                  <div class="reward-stat-card">
+                    <span>XP at stake</span>
+                    <strong>{signed_amount(failed_reward_preview(@latest_result).xp_gained)}</strong>
+                  </div>
+                  <div class="reward-stat-card">
+                    <span>Beans at stake</span>
+                    <strong>
+                      {signed_amount(failed_reward_preview(@latest_result).coffee_gained)}
+                    </strong>
+                  </div>
+                  <div class="reward-stat-card">
+                    <span>Energy on clear</span>
+                    <strong>
+                      {signed_amount(failed_reward_preview(@latest_result).stat_changes.energy)}
+                    </strong>
+                  </div>
+                  <div
+                    :if={failed_reward_preview(@latest_result).stat_changes.focus != 0}
+                    class="reward-stat-card"
+                  >
+                    <span>Focus on clear</span>
+                    <strong>
+                      {signed_amount(failed_reward_preview(@latest_result).stat_changes.focus)}
+                    </strong>
+                  </div>
+                  <div
+                    :if={failed_reward_preview(@latest_result).stat_changes.mood != 0}
+                    class="reward-stat-card"
+                  >
+                    <span>Mood on clear</span>
+                    <strong>
+                      {signed_amount(failed_reward_preview(@latest_result).stat_changes.mood)}
+                    </strong>
+                  </div>
+                  <div
+                    :if={failed_reward_preview(@latest_result).stat_changes.caffeine != 0}
+                    class="reward-stat-card"
+                  >
+                    <span>Caffeine on clear</span>
+                    <strong>
+                      {signed_amount(failed_reward_preview(@latest_result).stat_changes.caffeine)}
+                    </strong>
+                  </div>
+                </div>
+              </div>
+
+              <div :if={@reward_result} id="lesson-reward-banner" class="reward-banner">
+                <div :if={caffeine_reward?(@reward_result)} class="reward-hero">
+                  <div class="reward-header">
+                    <div class="section-heading">
+                      <p class="eyebrow">Completion</p>
+                      <h3>Lesson cleared</h3>
+                    </div>
+                    <p class="reward-summary">
+                      Your caffeine reward is applied and shown with the result.
+                    </p>
+
+                    <div id="lesson-caffeine-spotlight" class="reward-spotlight">
+                      <p class="eyebrow">Coffee reward</p>
+                      <p class="reward-spotlight-copy">
+                        Reward applied:
+                        <strong>
+                          {signed_amount(@reward_result.stat_changes.caffeine)} caffeine
+                        </strong>
+                        for this clear.
+                      </p>
+                    </div>
+                  </div>
+
+                  <CodieWeb.LessonCompanion.lesson_companion
+                    profile={@profile}
+                    latest_result={@latest_result}
+                    reward_result={@reward_result}
+                    trigger={@companion_trigger}
+                    reaction_token={@companion_reaction_token}
+                    placement={:reward}
+                    show_pop={false}
+                    dom_id="lesson-reward"
+                  />
+                </div>
+
+                <div :if={not caffeine_reward?(@reward_result)} class="reward-hero">
+                  <div class="reward-header">
+                    <div class="section-heading">
+                      <p class="eyebrow">Completion</p>
+                      <h3>Lesson cleared</h3>
+                    </div>
+                    <p class="reward-summary">
+                      Codie banks the win and turns it into permanent progress.
+                    </p>
+                  </div>
+
+                  <CodieWeb.LessonCompanion.lesson_companion
+                    profile={@profile}
+                    latest_result={@latest_result}
+                    reward_result={@reward_result}
+                    trigger={@companion_trigger}
+                    reaction_token={@companion_reaction_token}
+                    placement={:reward}
+                    show_pop={false}
+                    dom_id="lesson-reward"
+                  />
+                </div>
+
+                <div class="reward-stat-grid">
+                  <div class="reward-stat-card">
+                    <span>XP</span>
+                    <strong>{signed_amount(@reward_result.xp_gained)}</strong>
+                  </div>
+                  <div class="reward-stat-card">
+                    <span>Beans</span>
+                    <strong>{signed_amount(@reward_result.coffee_gained)}</strong>
+                  </div>
+                  <div class="reward-stat-card">
+                    <span>Energy</span>
+                    <strong>{signed_amount(@reward_result.stat_changes.energy)}</strong>
+                  </div>
+                  <div :if={@reward_result.stat_changes.focus != 0} class="reward-stat-card">
+                    <span>Focus</span>
+                    <strong>{signed_amount(@reward_result.stat_changes.focus)}</strong>
+                  </div>
+                  <div :if={@reward_result.stat_changes.mood != 0} class="reward-stat-card">
+                    <span>Mood</span>
+                    <strong>{signed_amount(@reward_result.stat_changes.mood)}</strong>
+                  </div>
+                  <div :if={@reward_result.stat_changes.caffeine != 0} class="reward-stat-card">
+                    <span>Caffeine</span>
+                    <strong>{signed_amount(@reward_result.stat_changes.caffeine)}</strong>
+                  </div>
+                </div>
+
+                <div :if={@next_lessons != []} class="reward-next-list">
+                  <div class="reward-next-heading">
+                    <p class="eyebrow">Linked Next Lessons</p>
+                    <p class="muted-copy">Keep the momentum going with the next unlocked nodes.</p>
+                  </div>
+                  <div class="reward-actions">
+                    <.link
+                      :for={next <- @next_lessons}
+                      navigate={~p"/lesson/#{next.slug}"}
+                      class="secondary-cta"
+                    >
+                      Next: {next.title}
+                    </.link>
+                  </div>
+                </div>
+
+                <div
+                  :if={@next_lessons == [] && @next_lesson && @next_lesson.slug != @lesson.slug}
+                  class="reward-next-list"
+                >
+                  <div class="reward-next-heading">
+                    <p class="eyebrow">Next Lesson</p>
+                    <p class="muted-copy">Take the clean handoff straight into the next challenge.</p>
+                  </div>
+                  <div class="reward-actions">
+                    <.link navigate={~p"/lesson/#{@next_lesson.slug}"} class="secondary-cta">
+                      Continue forward
+                    </.link>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div :if={@reward_result} id="lesson-reward-banner" class="reward-banner">
-            <div class="reward-header">
-              <div class="section-heading">
-                <p class="eyebrow">Completion</p>
-                <h3>Lesson cleared</h3>
-              </div>
-              <p class="reward-summary">Codie banks the win and turns it into permanent progress.</p>
-            </div>
-
-            <div class="reward-stat-grid">
-              <div class="reward-stat-card">
-                <span>XP</span>
-                <strong>{signed_amount(@reward_result.xp_gained)}</strong>
-              </div>
-              <div class="reward-stat-card">
-                <span>Beans</span>
-                <strong>{signed_amount(@reward_result.coffee_gained)}</strong>
-              </div>
-              <div class="reward-stat-card">
-                <span>Energy</span>
-                <strong>{signed_amount(@reward_result.stat_changes.energy)}</strong>
-              </div>
-              <div :if={@reward_result.stat_changes.focus != 0} class="reward-stat-card">
-                <span>Focus</span>
-                <strong>{signed_amount(@reward_result.stat_changes.focus)}</strong>
-              </div>
-              <div :if={@reward_result.stat_changes.mood != 0} class="reward-stat-card">
-                <span>Mood</span>
-                <strong>{signed_amount(@reward_result.stat_changes.mood)}</strong>
-              </div>
-              <div :if={@reward_result.stat_changes.caffeine != 0} class="reward-stat-card">
-                <span>Caffeine</span>
-                <strong>{signed_amount(@reward_result.stat_changes.caffeine)}</strong>
-              </div>
-            </div>
-
-            <div :if={@next_lessons != []} class="reward-next-list">
-              <div class="reward-next-heading">
-                <p class="eyebrow">Linked Next Lessons</p>
-                <p class="muted-copy">Keep the momentum going with the next unlocked nodes.</p>
-              </div>
-              <div class="reward-actions">
-                <.link
-                  :for={next <- @next_lessons}
-                  navigate={~p"/lesson/#{next.slug}"}
-                  class="secondary-cta"
-                >
-                  Next: {next.title}
-                </.link>
-              </div>
-            </div>
-
-            <div
-              :if={@next_lessons == [] && @next_lesson && @next_lesson.slug != @lesson.slug}
-              class="reward-next-list"
-            >
-              <div class="reward-next-heading">
-                <p class="eyebrow">Next Lesson</p>
-                <p class="muted-copy">Take the clean handoff straight into the next challenge.</p>
-              </div>
-              <div class="reward-actions">
-                <.link navigate={~p"/lesson/#{@next_lesson.slug}"} class="secondary-cta">
-                  Continue forward
-                </.link>
-              </div>
-            </div>
+          <div :if={is_nil(@reward_result)} class="lesson-workspace-rail">
+            <CodieWeb.LessonCompanion.lesson_companion
+              profile={@profile}
+              latest_result={@latest_result}
+              reward_result={if(caffeine_reward?(@reward_result), do: nil, else: @reward_result)}
+              trigger={if(caffeine_reward?(@reward_result), do: nil, else: @companion_trigger)}
+              reaction_token={@companion_reaction_token}
+            />
           </div>
         </div>
       </div>
@@ -455,6 +635,8 @@ defmodule CodieWeb.LessonLive do
       hint_index: 0,
       latest_result: nil,
       reward_result: nil,
+      companion_trigger: nil,
+      companion_reaction_token: 0,
       next_lesson: Curriculum.next_lesson_for_profile(profile),
       next_lessons: next_lessons_for(profile, lesson),
       run_state: :idle,
@@ -472,6 +654,68 @@ defmodule CodieWeb.LessonLive do
       next_lesson: Curriculum.next_lesson_for_profile(socket.assigns.profile),
       next_lessons: next_lessons_for(socket.assigns.profile, socket.assigns.lesson)
     )
+  end
+
+  defp clear_companion_reaction(socket) do
+    assign(socket,
+      companion_trigger: nil,
+      companion_reaction_token: next_companion_reaction_token(socket)
+    )
+  end
+
+  defp trigger_companion_reaction(socket, trigger) do
+    reaction_token = next_companion_reaction_token(socket)
+
+    schedule_companion_reaction_clear(trigger, reaction_token)
+
+    assign(socket,
+      companion_trigger: trigger,
+      companion_reaction_token: reaction_token
+    )
+  end
+
+  defp schedule_companion_reaction_clear(:caffeine_gain, _reaction_token), do: :ok
+  defp schedule_companion_reaction_clear(:mistake_or_failed_run, _reaction_token), do: :ok
+
+  defp schedule_companion_reaction_clear(trigger, reaction_token) do
+    Process.send_after(
+      self(),
+      {:clear_companion_reaction, reaction_token},
+      companion_reaction_ms(trigger)
+    )
+  end
+
+  defp companion_trigger_for_reward(%{stat_changes: %{caffeine: caffeine_gain}})
+       when caffeine_gain > 0,
+       do: :caffeine_gain
+
+  defp companion_trigger_for_reward(_reward_result), do: :lesson_passed
+
+  defp caffeine_reward?(%{stat_changes: %{caffeine: caffeine_gain}}) when caffeine_gain > 0,
+    do: true
+
+  defp caffeine_reward?(_reward_result), do: false
+
+  defp failed_reward_preview(%{status: status, reward_preview: reward_preview})
+       when status not in [:pass, "pass"] and not is_nil(reward_preview),
+       do: reward_preview
+
+  defp failed_reward_preview(_latest_result), do: nil
+
+  defp companion_reaction_ms(:lesson_passed), do: @companion_reaction_ms * 2
+  defp companion_reaction_ms(_trigger), do: @companion_reaction_ms
+
+  defp maybe_clear_failed_companion_reaction(
+         %{assigns: %{companion_trigger: :mistake_or_failed_run}} = socket
+       ),
+       do: clear_companion_reaction(socket)
+
+  defp maybe_clear_failed_companion_reaction(socket), do: socket
+
+  defp next_companion_reaction_token(socket) do
+    socket.assigns
+    |> Map.get(:companion_reaction_token, 0)
+    |> Kernel.+(1)
   end
 
   defp refresh_progress(socket) do

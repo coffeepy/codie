@@ -532,6 +532,32 @@ const liveSocket = new LiveSocket("/live", Socket, {
 topbar.config({barColors: {0: "#df8f3f"}, shadowColor: "rgba(23, 19, 18, 0.35)"})
 window.addEventListener("phx:page-loading-start", _info => topbar.show(300))
 window.addEventListener("phx:page-loading-stop", _info => topbar.hide())
+const scrollLessonFeedbackIntoView = (targetId, attempts = 12) => {
+  const target = document.getElementById(targetId)
+  if (!target) {
+    if (attempts <= 0) return
+
+    window.requestAnimationFrame(() => {
+      scrollLessonFeedbackIntoView(targetId, attempts - 1)
+    })
+
+    return
+  }
+
+  const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"
+
+  window.requestAnimationFrame(() => {
+    target.scrollIntoView({block: "start", behavior})
+  })
+}
+
+window.addEventListener("phx:lesson-focus-success-reward", ({detail}) => {
+  scrollLessonFeedbackIntoView(detail.target_id)
+})
+
+window.addEventListener("phx:lesson-focus-failure-feedback", ({detail}) => {
+  scrollLessonFeedbackIntoView(detail.target_id)
+})
 
 // connect if there are any LiveViews on the page
 liveSocket.connect()
