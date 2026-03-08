@@ -3,6 +3,7 @@ defmodule CodieWeb.DashboardLive do
 
   alias Codie.Curriculum
   alias Codie.Progress
+  alias CodieWeb.LessonCompanion
 
   @impl true
   def mount(_params, _session, socket) do
@@ -29,15 +30,39 @@ defmodule CodieWeb.DashboardLive do
         </div>
       </div>
 
-      <div class="glass-panel codie-card">
-        <div class="codie-avatar">
-          <div class="codie-head"></div>
-          <div class="codie-steam"></div>
-        </div>
-        <div>
-          <p class="eyebrow">Current Companion</p>
-          <h2>{@profile.name}</h2>
-          <p class="codie-subtitle">Level {@profile.level} Elixir apprentice</p>
+      <div class="glass-panel codie-card" data-codie-tone={@current_companion.tone}>
+        <div class="codie-card-header">
+          <div class="codie-avatar-board-shell">
+            <div
+              id="dashboard-current-companion"
+              class="codie-avatar-board"
+              data-codie-state={@current_companion.state}
+              data-codie-tone={@current_companion.tone}
+              data-codie-emotion={@current_companion.emotion}
+              data-codie-sprite={@current_companion.sprite}
+            >
+              <div class="codie-avatar-board-glow"></div>
+              <div
+                class="codie-avatar-board-frame"
+                role="img"
+                aria-label={@current_companion.aria_label}
+              >
+                <div class="codie-avatar-board-sprite" style={@current_companion.sprite_style}></div>
+              </div>
+            </div>
+            <p id="dashboard-current-companion-caption" class="codie-avatar-board-caption">
+              {@current_companion.caption}
+            </p>
+          </div>
+          <div class="codie-card-copy">
+            <p class="eyebrow">Current Companion</p>
+            <div class="codie-card-title-row">
+              <h2>Codie</h2>
+              <span class="codie-tone-pill">{@current_companion.label}</span>
+            </div>
+            <p class="codie-subtitle">{@current_companion.headline}</p>
+            <p class="codie-status-copy">{@current_companion.message}</p>
+          </div>
         </div>
         <div class="stats-grid">
           <div class="stat-card">
@@ -127,6 +152,7 @@ defmodule CodieWeb.DashboardLive do
     assign(socket,
       page_title: "Dashboard",
       profile: snapshot.profile,
+      current_companion: LessonCompanion.companion(snapshot.profile),
       next_lesson: snapshot.next_lesson,
       track_progress: snapshot.track_progress,
       recent_runs: snapshot.recent_runs,

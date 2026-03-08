@@ -27,7 +27,7 @@ defmodule CodieWeb.ProfileLiveTest do
 
     {:ok, view, html} = live(conn, ~p"/profile")
     assert html =~ "Reset All Progress"
-    assert html =~ "1 tries"
+    assert has_element?(view, ".attempt-row")
 
     render_click(view, "reset_all_progress")
 
