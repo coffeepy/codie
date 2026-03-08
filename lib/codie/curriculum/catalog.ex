@@ -86,6 +86,35 @@ defmodule Codie.Curriculum.Catalog do
         teaser: "Use modules, helpers, and `with` to build small real programs."
       },
       %Track{
+        slug: "real-project-workflow-mix",
+        title: "Real Project Workflow: Mix and Project Navigation",
+        summary:
+          "Learn to open a normal Elixir repo, get oriented fast, and use the high-frequency Mix commands that move real work forward.",
+        theme: "Repo Desk",
+        estimated_lesson_count: 6,
+        teaser: "Open the repo, run the right command, and narrow the next failure."
+      },
+      %Track{
+        slug: "real-project-workflow-quality",
+        title: "Real Project Workflow: Tests, Debugging, and Docs",
+        summary:
+          "Learn to read failing assertions, add the missing test, debug with intent, and explain the fix with clear docs.",
+        theme: "Proof Desk",
+        estimated_lesson_count: 6,
+        teaser:
+          "Fix the bug, prove it with a test, and leave the next reader a clean explanation."
+      },
+      %Track{
+        slug: "real-project-workflow-structure",
+        title: "Real Project Workflow: Multi-file Modules",
+        summary:
+          "Learn to split small Elixir features across focused modules without changing behavior.",
+        theme: "Structure Bench",
+        estimated_lesson_count: 6,
+        teaser:
+          "Give each module one job, wire them together, and keep the feature behavior stable."
+      },
+      %Track{
         slug: "foundations-old",
         title: "Foundations (Legacy)",
         summary:
@@ -6477,6 +6506,1588 @@ defmodule Codie.Curriculum.Catalog do
             "working-with-data-workflow-roundup",
             "Workflow Report Roundup",
             "A small Elixir workflow often means normalizing raw input, passing one tagged result through `with`, and returning one clear final report."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "real-project-workflow-mix",
+        slug: "project-map",
+        title: "Project Map",
+        summary:
+          "Get oriented by naming the files and folders you open first in a normal Elixir repo.",
+        teaching_markdown: """
+        What:
+        A normal Mix project usually starts with `mix.exs` at the root, `lib/` for application code, and `test/` for test files.
+
+        Example:
+        `%{project_file: "mix.exs", app_dir: "lib", test_dir: "test"}`
+
+        Why:
+        If you know those three landmarks, you stop wandering and can answer “where should I look next?” faster.
+
+        Common cases:
+        Check `mix.exs` for dependencies and task aliases
+        Open `lib/` when a failure points into application code
+        Open `test/` when you need to read or target a failing test
+
+        Watch out:
+        This is a project map, not a full tree. Start with the high-signal landmarks first.
+
+        Task:
+        Bind `repo_map = %{project_file: "mix.exs", app_dir: "lib", test_dir: "test"}`.
+        Return `repo_map`.
+        """,
+        starter_code: """
+        repo_map = %{}
+        repo_map
+        """,
+        prerequisites: ["workflow-report-roundup"],
+        checks: [
+          binds(:repo_map, %{project_file: "mix.exs", app_dir: "lib", test_dir: "test"},
+            checkpoint: "Build the repo map",
+            failure_message:
+              "Bind `repo_map` to the three landmarks: `mix.exs`, `lib`, and `test`."
+          ),
+          returns(%{project_file: "mix.exs", app_dir: "lib", test_dir: "test"},
+            checkpoint: "Return the repo map",
+            failure_message:
+              "The final expression should evaluate to `%{project_file: \"mix.exs\", app_dir: \"lib\", test_dir: \"test\"}`."
+          )
+        ],
+        hints: [
+          "Start with the root project file, then the app code folder, then the test folder.",
+          "Use the exact strings `\"mix.exs\"`, `\"lib\"`, and `\"test\"`.",
+          "The final expression can simply be `repo_map`."
+        ],
+        quick_terms: [
+          quick_term(
+            "Repo landmarks",
+            "`mix.exs`, `lib`, and `test` are the first high-signal places to check in a normal Elixir repo."
+          )
+        ],
+        rewards: reward(34, 2, 4, 4, 3, 1),
+        codex_entries_unlocked: [
+          codex(
+            "repo-landmarks",
+            "Repo Landmarks",
+            "Start with `mix.exs`, `lib/`, and `test/` when you first open a normal Elixir project.",
+            "%{project_file: \"mix.exs\", app_dir: \"lib\", test_dir: \"test\"}",
+            "Do not try to understand the whole tree at once; start with the project file and the main code/test folders.",
+            "Use this map when you first join a repo or when you need to decide where a failure probably lives."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "real-project-workflow-mix",
+        slug: "run-the-suite",
+        title: "Run the Suite",
+        summary: "Use `mix test` when you need the first broad signal from the repo.",
+        teaching_markdown: """
+        What:
+        `mix test` runs the project test suite.
+
+        Example:
+        `mix test`
+
+        Why:
+        When you first join a repo or finish a small change, the broad signal tells you what is failing before you narrow further.
+
+        Common cases:
+        Run the whole suite right after pulling a branch
+        Confirm the current red/green state before you focus on one file
+        Re-check the broad test signal after a small safe fix
+
+        Watch out:
+        Broad first, narrow second. Do not guess a failing file before you have the wider signal.
+
+        Task:
+        Bind `suite_command = "mix test"`.
+        Return `{:full_suite, suite_command}`.
+        """,
+        starter_code: """
+        suite_command = ""
+        {:todo, suite_command}
+        """,
+        prerequisites: ["project-map"],
+        checks: [
+          binds(:suite_command, "mix test",
+            checkpoint: "Choose `mix test` for the broad test run",
+            failure_message: "Bind `suite_command` to `\"mix test\"`."
+          ),
+          returns({:full_suite, "mix test"},
+            checkpoint: "Return the full-suite choice",
+            failure_message:
+              "The final expression should evaluate to `{:full_suite, \"mix test\"}`."
+          )
+        ],
+        hints: [
+          "This lesson is about the first broad test signal, not a narrowed rerun.",
+          "Bind the exact command string `\"mix test\"`.",
+          "Return the tuple `{:full_suite, suite_command}`."
+        ],
+        quick_terms: [
+          quick_term(
+            "Broad signal",
+            "A broad signal is the first whole-project check that tells you where to focus next."
+          )
+        ],
+        rewards: reward(34, 2, 4, 4, 3, 1),
+        codex_entries_unlocked: [
+          codex(
+            "mix-test",
+            "mix test",
+            "Run the full test suite to get the broad current signal from the project.",
+            "mix test",
+            "A compile error can stop the suite before you ever reach a failing assertion.",
+            "Use `mix test` when you want the current whole-project test signal before narrowing to one failure."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "real-project-workflow-mix",
+        slug: "target-one-failure",
+        title: "Target One Failure",
+        summary: "Narrow from the whole suite to one failing test file.",
+        teaching_markdown: """
+        What:
+        Once the suite points at one failing file, you can rerun that file directly with `mix test path/to/file.exs`.
+
+        Example:
+        `mix test test/codie/runner_test.exs`
+
+        Why:
+        A smaller loop makes it easier to read one failure, try one fix, and re-run quickly.
+
+        Common cases:
+        One red test file stands out after a broad suite run
+        You are iterating on one failure and want faster feedback
+        You want to prove one file is green before broadening again
+
+        Watch out:
+        Narrow only after the broader run has already told you which file matters.
+
+        Task:
+        Bind `failing_file = "test/codie/runner_test.exs"`.
+        Bind `targeted_command = "mix test test/codie/runner_test.exs"`.
+        Return `targeted_command`.
+        """,
+        starter_code: """
+        failing_file = ""
+        targeted_command = ""
+        targeted_command
+        """,
+        prerequisites: ["run-the-suite"],
+        checks: [
+          binds(:failing_file, "test/codie/runner_test.exs",
+            checkpoint: "Name the failing test file",
+            failure_message: "Bind `failing_file` to `\"test/codie/runner_test.exs\"`."
+          ),
+          binds(:targeted_command, "mix test test/codie/runner_test.exs",
+            checkpoint: "Build the targeted test command",
+            failure_message:
+              "Bind `targeted_command` to `\"mix test test/codie/runner_test.exs\"`."
+          ),
+          returns("mix test test/codie/runner_test.exs",
+            checkpoint: "Return the targeted test command",
+            failure_message:
+              "The final expression should evaluate to `\"mix test test/codie/runner_test.exs\"`."
+          )
+        ],
+        hints: [
+          "Keep the file path exactly as written in the task.",
+          "The command starts with `mix test ` and then the failing file path.",
+          "The final expression can simply be `targeted_command`."
+        ],
+        quick_terms: [
+          quick_term(
+            "Targeted rerun",
+            "A targeted rerun focuses on one failing test file so the feedback loop stays fast."
+          )
+        ],
+        rewards: reward(36, 2, 4, 4, 3, 1),
+        codex_entries_unlocked: [
+          codex(
+            "mix-targeted-test",
+            "Targeted mix test",
+            "Run one failing test file directly when the broad suite has already told you where the problem is.",
+            "mix test test/codie/runner_test.exs",
+            "Do not start here by default; use it after a broader run identifies the failing file.",
+            "Use a targeted `mix test` command when you are iterating on one failing file and want a tighter loop."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "real-project-workflow-mix",
+        slug: "compile-first",
+        title: "Compile First",
+        summary: "Reach for `mix compile` when the project is not compiling cleanly.",
+        teaching_markdown: """
+        What:
+        `mix compile` checks whether the project builds before you chase test behavior.
+
+        Example:
+        `mix compile`
+
+        Why:
+        If the app code does not compile, test failures are often downstream noise. Fix the compile break first.
+
+        Common cases:
+        A syntax error stops the project from building
+        A renamed function or module now fails to compile
+        A compile-time attribute or macro error shows up before tests run
+
+        Watch out:
+        `mix compile` is for code that will not build. It is not the first move for a red assertion in an otherwise compiling test.
+
+        Task:
+        Bind `next_step = {:compile_error, "mix compile"}`.
+        Return `next_step`.
+        """,
+        starter_code: """
+        next_step = {:todo, ""}
+        next_step
+        """,
+        prerequisites: ["target-one-failure"],
+        checks: [
+          binds(:next_step, {:compile_error, "mix compile"},
+            checkpoint: "Choose `mix compile` for a compile error",
+            failure_message: "Bind `next_step` to `{:compile_error, \"mix compile\"}`."
+          ),
+          returns({:compile_error, "mix compile"},
+            checkpoint: "Return the compile-first decision",
+            failure_message:
+              "The final expression should evaluate to `{:compile_error, \"mix compile\"}`."
+          )
+        ],
+        hints: [
+          "This lesson is about a compile break, not a failing assertion.",
+          "Use the exact command string `\"mix compile\"`.",
+          "Return the same tuple you bound to `next_step`."
+        ],
+        quick_terms: [
+          quick_term(
+            "Compile break",
+            "A compile break means the project cannot build cleanly, so fix that before reading test behavior."
+          )
+        ],
+        rewards: reward(36, 2, 4, 4, 3, 1),
+        codex_entries_unlocked: [
+          codex(
+            "mix-compile",
+            "mix compile",
+            "Check whether the project builds cleanly before you spend time reading downstream test failures.",
+            "mix compile",
+            "A compiling project can still have failing tests, but a non-compiling project should usually be fixed first.",
+            "Use `mix compile` when the codebase is broken at build time and you need to confirm the compile error path first."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "real-project-workflow-mix",
+        slug: "ask-mix-for-help",
+        title: "Ask Mix for Help",
+        summary: "Use `mix help TASK` when you forget how a task behaves.",
+        teaching_markdown: """
+        What:
+        `mix help TASK` shows the docs for a Mix task.
+
+        Example:
+        `mix help test`
+
+        Why:
+        When you forget options or behavior, asking Mix directly is faster and safer than guessing.
+
+        Common cases:
+        Re-check what the test task does
+        Look up task options before trying a new flag
+        Confirm a task name when you know the job but not the exact command
+
+        Watch out:
+        `mix help test` explains the task. It is not the command that runs the tests.
+
+        Task:
+        Bind `help_command = "mix help test"`.
+        Return `{:need_task_help, help_command}`.
+        """,
+        starter_code: """
+        help_command = ""
+        {:todo, help_command}
+        """,
+        prerequisites: ["compile-first"],
+        checks: [
+          binds(:help_command, "mix help test",
+            checkpoint: "Ask Mix for test-task help",
+            failure_message: "Bind `help_command` to `\"mix help test\"`."
+          ),
+          returns({:need_task_help, "mix help test"},
+            checkpoint: "Return the help command choice",
+            failure_message:
+              "The final expression should evaluate to `{:need_task_help, \"mix help test\"}`."
+          )
+        ],
+        hints: [
+          "The shape is `mix help` followed by the task name.",
+          "This lesson uses the `test` task as the concrete example.",
+          "Return the tuple `{:need_task_help, help_command}`."
+        ],
+        quick_terms: [
+          quick_term(
+            "Task help",
+            "`mix help TASK` is the built-in way to ask Mix what a task does and how to use it."
+          )
+        ],
+        rewards: reward(34, 2, 4, 4, 3, 1),
+        codex_entries_unlocked: [
+          codex(
+            "mix-help",
+            "mix help",
+            "Ask Mix for task documentation when you need to confirm how a command works.",
+            "mix help test",
+            "Help output explains a task; it does not perform the task for you.",
+            "Use `mix help TASK` when you know the task name but want the built-in docs before you run it."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "real-project-workflow-mix",
+        slug: "first-day-in-the-repo",
+        title: "First Day in the Repo",
+        tier: :boss,
+        summary: "Pull the repo landmarks and core Mix moves into one small orientation plan.",
+        teaching_markdown: """
+        What:
+        A good first day in a repo means knowing where the main code lives, what to run first, how to narrow a failure, and how to ask Mix for help.
+
+        Example:
+        `%{suite_command: "mix test", compile_command: "mix compile"}`
+
+        Why:
+        Real work starts with orientation and a short, reliable loop rather than random wandering.
+
+        Common cases:
+        Join a new repo and get your bearings fast
+        Run the broad suite, then narrow to one failure
+        Stop and check Mix help when a task detail feels fuzzy
+
+        Watch out:
+        Keep this plan high-signal. This track is about repo navigation and the main Mix loop, not shell trivia or runtime architecture.
+
+        Task:
+        Define `CodiePlayground.FirstDay.plan/1`.
+        It should take `failing_file` and return:
+        `%{project_file: "mix.exs", app_dir: "lib", test_dir: "test", suite_command: "mix test", targeted_command: "mix test " <> failing_file, compile_command: "mix compile", help_command: "mix help test"}`.
+
+        Make the final expression call `CodiePlayground.FirstDay.plan("test/codie/runner_test.exs")`.
+        """,
+        starter_code: """
+        defmodule CodiePlayground.FirstDay do
+          def plan(_failing_file), do: %{}
+        end
+
+        CodiePlayground.FirstDay.plan("")
+        """,
+        prerequisites: ["ask-mix-for-help"],
+        checks: [
+          source_contains("mix.exs",
+            checkpoint: "Include the project file landmark",
+            failure_message: "Include `mix.exs` in the returned plan map."
+          ),
+          source_contains("mix test",
+            checkpoint: "Include the broad test command",
+            failure_message: "Include `mix test` in the returned plan map."
+          ),
+          source_contains("mix compile",
+            checkpoint: "Include the compile command",
+            failure_message: "Include `mix compile` in the returned plan map."
+          ),
+          source_contains("mix help test",
+            checkpoint: "Include the help command",
+            failure_message: "Include `mix help test` in the returned plan map."
+          ),
+          module_function(
+            CodiePlayground.FirstDay,
+            :plan,
+            ["test/codie/runner_test.exs"],
+            %{
+              project_file: "mix.exs",
+              app_dir: "lib",
+              test_dir: "test",
+              suite_command: "mix test",
+              targeted_command: "mix test test/codie/runner_test.exs",
+              compile_command: "mix compile",
+              help_command: "mix help test"
+            },
+            checkpoint: "Return the day-one repo plan",
+            failure_message:
+              "`CodiePlayground.FirstDay.plan(\"test/codie/runner_test.exs\")` should return the full orientation plan map."
+          ),
+          returns(
+            %{
+              project_file: "mix.exs",
+              app_dir: "lib",
+              test_dir: "test",
+              suite_command: "mix test",
+              targeted_command: "mix test test/codie/runner_test.exs",
+              compile_command: "mix compile",
+              help_command: "mix help test"
+            },
+            checkpoint: "Return the orientation plan from the final call",
+            failure_message:
+              "The final expression should evaluate to the full orientation plan map for `test/codie/runner_test.exs`."
+          )
+        ],
+        hints: [
+          "Keep `plan/1` focused on one returned map with the repo landmarks and the four core command decisions.",
+          "Build the targeted command from the incoming `failing_file` so the plan stays reusable.",
+          "The final expression should call `CodiePlayground.FirstDay.plan(\"test/codie/runner_test.exs\")`."
+        ],
+        quick_terms: [
+          quick_term(
+            "Orientation loop",
+            "A good orientation loop is: find the repo landmarks, run the broad check, narrow one failure, compile when needed, and ask Mix for help when unsure."
+          )
+        ],
+        rewards: reward(58, 2, 6, 6, 5, 2),
+        codex_entries_unlocked: [
+          codex(
+            "repo-orientation",
+            "Day-One Repo Plan",
+            "A good day-one plan names the repo landmarks and the first Mix commands you use to get oriented and move safely.",
+            "%{suite_command: \"mix test\", targeted_command: \"mix test test/codie/runner_test.exs\"}",
+            "Do not overcomplicate the first pass; start with the broad signal and a short, repeatable loop.",
+            "Use this plan when you first open a real Elixir repo and need a reliable order for your first checks."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "real-project-workflow-quality",
+        slug: "read-the-assertion",
+        title: "Read the Assertion",
+        summary:
+          "Start with the failing assertion by separating the expected value, the actual value, and the clue it gives you.",
+        teaching_markdown: """
+        What:
+        A failing assertion usually tells you the two most important things first: what the test expected and what the code actually returned.
+
+        Example:
+        `%{expected: [\"LATTE\", \"MOCHA\"], actual: [\"\", \"LATTE\", \"MOCHA\"]}`
+
+        Why:
+        Reading that difference clearly helps you focus on the bug instead of guessing at random fixes.
+
+        Common cases:
+        Compare the expected and actual values from one failing test
+        Name the first concrete clue before changing code
+
+        Watch out:
+        Do not jump straight to the fix. Read the mismatch first so the bug has a clear shape.
+
+        Task:
+        Bind `expected = [\"LATTE\", \"MOCHA\"]`.
+        Bind `actual = [\"\", \"LATTE\", \"MOCHA\"]`.
+        Bind `clue = :blank_label`.
+        Return `%{expected: expected, actual: actual, clue: clue}`.
+        """,
+        starter_code: """
+        expected = []
+        actual = []
+        clue = :todo
+
+        %{expected: expected, actual: actual, clue: clue}
+        """,
+        prerequisites: ["first-day-in-the-repo"],
+        checks: [
+          binds(:expected, ["LATTE", "MOCHA"],
+            checkpoint: "Capture the expected value",
+            failure_message: "Bind `expected` to `[\"LATTE\", \"MOCHA\"]`."
+          ),
+          binds(:actual, ["", "LATTE", "MOCHA"],
+            checkpoint: "Capture the actual value",
+            failure_message: "Bind `actual` to `[\"\", \"LATTE\", \"MOCHA\"]`."
+          ),
+          binds(:clue, :blank_label,
+            checkpoint: "Name the bug clue",
+            failure_message: "Bind `clue` to `:blank_label`."
+          ),
+          returns(
+            %{expected: ["LATTE", "MOCHA"], actual: ["", "LATTE", "MOCHA"], clue: :blank_label},
+            checkpoint: "Return the assertion summary",
+            failure_message:
+              "The final expression should evaluate to `%{expected: [\"LATTE\", \"MOCHA\"], actual: [\"\", \"LATTE\", \"MOCHA\"], clue: :blank_label}`."
+          )
+        ],
+        hints: [
+          "Keep the expected list as the cleaned result the test wanted.",
+          "Keep the actual list as the buggy result that still includes the blank label.",
+          "Return one map that names both values and the clue."
+        ],
+        quick_terms: [
+          quick_term(
+            "Assertion mismatch",
+            "An assertion mismatch is the gap between what a test expected and what the code actually returned."
+          )
+        ],
+        rewards: reward(36, 1, 4, 4, 3, 1),
+        codex_entries_unlocked: [
+          codex(
+            "failing-assertion",
+            "Read the Failing Assertion",
+            "A failing assertion gives you the expected value, the actual value, and often your first clue about the bug.",
+            "%{expected: [\"LATTE\"], actual: [\"\", \"LATTE\"]}",
+            "Do not skip straight to editing code before you can say what the mismatch actually is.",
+            "Use this when a failing test already shows a concrete expected-vs-actual difference and you need to focus the bug."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "real-project-workflow-quality",
+        slug: "write-the-missing-test",
+        title: "Write the Missing Test",
+        summary:
+          "Turn the bug clue into one targeted regression case before you change the implementation.",
+        teaching_markdown: """
+        What:
+        A missing regression test captures the exact case that slipped through before.
+
+        Example:
+        `%{input: [\" mocha \", \" \", \"latte \"], expected: [\"LATTE\", \"MOCHA\"]}`
+
+        Why:
+        Once the missing case is written down, the bug has a stable proof instead of living only in your memory.
+
+        Common cases:
+        Add one focused test for the specific bug you just read in the assertion
+        Name the regression case so the next reader knows what behavior is protected
+
+        Watch out:
+        Keep the new case narrow. One bug, one proof.
+
+        Task:
+        Bind `test_name = "filters blank labels"`.
+        Bind `new_case = %{input: [" mocha ", " ", "latte "], expected: ["LATTE", "MOCHA"]}`.
+        Return `{test_name, new_case}`.
+        """,
+        starter_code: """
+        test_name = ""
+        new_case = %{input: [], expected: []}
+
+        {test_name, new_case}
+        """,
+        prerequisites: ["read-the-assertion"],
+        checks: [
+          binds(:test_name, "filters blank labels",
+            checkpoint: "Name the regression case",
+            failure_message: "Bind `test_name` to `\"filters blank labels\"`."
+          ),
+          binds(:new_case, %{input: [" mocha ", " ", "latte "], expected: ["LATTE", "MOCHA"]},
+            checkpoint: "Capture the missing test case",
+            failure_message:
+              "Bind `new_case` to `%{input: [\" mocha \", \" \", \"latte \"], expected: [\"LATTE\", \"MOCHA\"]}`."
+          ),
+          returns(
+            {"filters blank labels",
+             %{input: [" mocha ", " ", "latte "], expected: ["LATTE", "MOCHA"]}},
+            checkpoint: "Return the named regression case",
+            failure_message:
+              "The final expression should evaluate to `{\"filters blank labels\", %{input: [\" mocha \", \" \", \"latte \"], expected: [\"LATTE\", \"MOCHA\"]}}`."
+          )
+        ],
+        hints: [
+          "Keep the test name focused on the one bug case.",
+          "The input list should include one blank value between two real labels.",
+          "Return the tuple `{test_name, new_case}` on the last line."
+        ],
+        quick_terms: [
+          quick_term(
+            "Regression test",
+            "A regression test protects a bug fix by proving the exact broken case now stays correct."
+          )
+        ],
+        rewards: reward(38, 1, 4, 4, 3, 1),
+        codex_entries_unlocked: [
+          codex(
+            "regression-test-case",
+            "Write the Missing Test",
+            "A good regression test names the bug clearly and locks one exact broken case into the suite.",
+            "%{input: [\" mocha \", \" \", \"latte \"], expected: [\"LATTE\", \"MOCHA\"]}",
+            "Do not broaden the case into several behaviors at once. Protect the exact bug first.",
+            "Use this when a failing assertion tells you a real case is missing from the suite."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "real-project-workflow-quality",
+        slug: "debug-with-purpose",
+        title: "Debug with Purpose",
+        summary:
+          "Add one focused inspection around the suspicious value instead of spraying output everywhere.",
+        teaching_markdown: """
+        What:
+        Purposeful debugging means inspecting the one value that should confirm or reject your bug theory.
+
+        Example:
+        `IO.inspect(cleaned, label: \"cleaned\")`
+
+        Why:
+        One targeted debug line is easier to read and easier to remove than a pile of noisy prints.
+
+        Common cases:
+        Inspect the cleaned list right after the suspicious transformation
+        Label the debug output so the value is obvious in the terminal
+
+        Watch out:
+        Inspect the value closest to the bug. Do not dump every step unless you truly need it.
+
+        Task:
+        Define `CodiePlayground.DebugLabel.labels/1`.
+        It should trim each label, reject blanks, inspect the cleaned list with `IO.inspect(..., label: "cleaned")`,
+        then uppercase and sort the remaining labels.
+
+        Make the final expression call `CodiePlayground.DebugLabel.labels([" mocha ", " ", "latte "])`.
+        """,
+        starter_code: """
+        defmodule CodiePlayground.DebugLabel do
+          def labels(_raw), do: []
+        end
+
+        CodiePlayground.DebugLabel.labels([])
+        """,
+        prerequisites: ["write-the-missing-test"],
+        checks: [
+          source_contains("IO.inspect",
+            checkpoint: "Add one targeted debug inspection",
+            failure_message: "Use `IO.inspect/2` for the focused debug step."
+          ),
+          source_contains(~S|label: "cleaned"|,
+            checkpoint: "Label the debug output",
+            failure_message: "Use `label: \"cleaned\"` so the debug output is easy to read."
+          ),
+          module_function(
+            CodiePlayground.DebugLabel,
+            :labels,
+            [[" mocha ", " ", "latte "]],
+            ["LATTE", "MOCHA"],
+            checkpoint: "`labels/1` should return the cleaned labels",
+            failure_message:
+              "`CodiePlayground.DebugLabel.labels([\" mocha \", \" \", \"latte \"])` should return `[\"LATTE\", \"MOCHA\"]`."
+          ),
+          returns(["LATTE", "MOCHA"],
+            checkpoint: "Return the cleaned labels from the final call",
+            failure_message: "The final expression should evaluate to `[\"LATTE\", \"MOCHA\"]`."
+          )
+        ],
+        hints: [
+          "Trim and reject blanks before the debug line so the inspected value matches your bug theory.",
+          "`IO.inspect/2` returns the inspected value, so you can keep the workflow moving.",
+          "Uppercase and sort after the inspection step."
+        ],
+        quick_terms: [
+          quick_term(
+            "Targeted debug step",
+            "A targeted debug step inspects one suspicious value with a clear label so you can confirm a specific theory quickly."
+          )
+        ],
+        rewards: reward(42, 1, 5, 5, 3, 1),
+        codex_entries_unlocked: [
+          codex(
+            "purposeful-debugging",
+            "Debug with Purpose",
+            "Inspect the one value closest to the bug so the output tells you something concrete instead of creating noise.",
+            ~S|IO.inspect(cleaned, label: "cleaned")|,
+            "If you inspect everything, you usually learn less. Start with the value your bug theory depends on.",
+            "Use this when you have a specific suspicion about one transformation step and need a fast confirmation."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "real-project-workflow-quality",
+        slug: "document-the-module",
+        title: "Document the Module",
+        summary:
+          "Add a short module-level explanation so the file tells the next reader what job it owns.",
+        teaching_markdown: """
+        What:
+        `@moduledoc` gives a module one clear sentence about what it is for.
+
+        Example:
+        `@moduledoc \"Builds cleaned labels for a small report.\"`
+
+        Why:
+        Real project files last longer than one bug fix. A module doc helps the next person open the file and orient quickly.
+
+        Common cases:
+        Explain what a small utility module is responsible for
+        Leave one high-signal sentence at the top of a new file
+
+        Watch out:
+        Keep the module doc about the module's job, not a line-by-line implementation tour.
+
+        Task:
+        Define `CodiePlayground.LabelDocs.labels/1`.
+        Add `@moduledoc "Builds cleaned labels for a small report."` at the top of the module.
+        `labels/1` should trim, reject blanks, uppercase, sort, and return the cleaned labels.
+
+        Make the final expression call `CodiePlayground.LabelDocs.labels([" mocha ", " ", "latte "])`.
+        """,
+        starter_code: """
+        defmodule CodiePlayground.LabelDocs do
+          def labels(_raw), do: []
+        end
+
+        CodiePlayground.LabelDocs.labels([])
+        """,
+        prerequisites: ["debug-with-purpose"],
+        checks: [
+          ast_contains("@moduledoc",
+            checkpoint: "Add a module doc",
+            failure_message: "Add a `@moduledoc` attribute near the top of the module."
+          ),
+          source_contains("Builds cleaned labels for a small report.",
+            checkpoint: "Explain the module's job",
+            failure_message:
+              "Use the module doc string `\"Builds cleaned labels for a small report.\"`."
+          ),
+          module_function(
+            CodiePlayground.LabelDocs,
+            :labels,
+            [[" mocha ", " ", "latte "]],
+            ["LATTE", "MOCHA"],
+            checkpoint: "`labels/1` should return the cleaned labels",
+            failure_message:
+              "`CodiePlayground.LabelDocs.labels([\" mocha \", \" \", \"latte \"])` should return `[\"LATTE\", \"MOCHA\"]`."
+          ),
+          returns(["LATTE", "MOCHA"],
+            checkpoint: "Return the cleaned labels from the final call",
+            failure_message: "The final expression should evaluate to `[\"LATTE\", \"MOCHA\"]`."
+          )
+        ],
+        hints: [
+          "Put `@moduledoc` just inside the module, before the function definition.",
+          "Keep the function focused on the cleaned-label workflow from the earlier lessons.",
+          "The last line should call `CodiePlayground.LabelDocs.labels/1`."
+        ],
+        quick_terms: [
+          quick_term(
+            "Module doc",
+            "A module doc is the short top-level explanation of what a module is responsible for."
+          )
+        ],
+        rewards: reward(44, 1, 5, 5, 4, 1),
+        codex_entries_unlocked: [
+          codex(
+            "module-doc",
+            "Document the Module",
+            "A short module doc tells the next reader what job the file owns before they read the implementation.",
+            ~S|@moduledoc "Builds cleaned labels for a small report."|,
+            "Do not turn the module doc into a long walkthrough. One clear job statement is usually enough.",
+            "Use this when you add or clean up a small project module and want the file to explain itself quickly."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "real-project-workflow-quality",
+        slug: "docs-that-prove-it",
+        title: "Docs That Prove It",
+        summary: "Add a function doc that states the exact behavior the bug fix now guarantees.",
+        teaching_markdown: """
+        What:
+        `@doc` belongs directly above one function and should explain the behavior that matters.
+
+        Example:
+        `@doc \"Drops blank labels and returns sorted uppercase labels.\"`
+
+        Why:
+        Good function docs do more than decorate the file. They say what the function promises after the fix.
+
+        Common cases:
+        Explain the cleaned output shape of a small utility function
+        Make the important bug-fix behavior visible right above the public function
+
+        Watch out:
+        Keep the doc tied to the public behavior, not to internal step-by-step implementation details.
+
+        Task:
+        Define `CodiePlayground.ProofDocs.labels/1`.
+        Add `@moduledoc "Formats labels for a tiny report."`.
+        Add `@doc "Drops blank labels and returns sorted uppercase labels."` directly above `labels/1`.
+        `labels/1` should trim, reject blanks, uppercase, sort, and return the cleaned labels.
+
+        Make the final expression call `CodiePlayground.ProofDocs.labels([" mocha ", " ", "latte "])`.
+        """,
+        starter_code: """
+        defmodule CodiePlayground.ProofDocs do
+          def labels(_raw), do: []
+        end
+
+        CodiePlayground.ProofDocs.labels([])
+        """,
+        prerequisites: ["document-the-module"],
+        checks: [
+          ast_contains("@moduledoc",
+            checkpoint: "Keep the module doc in place",
+            failure_message: "Add a `@moduledoc` attribute for the module."
+          ),
+          ast_contains("@doc",
+            checkpoint: "Add a function doc",
+            failure_message: "Add an `@doc` attribute directly above `labels/1`."
+          ),
+          source_contains("Drops blank labels and returns sorted uppercase labels.",
+            checkpoint: "State the fixed behavior in the docs",
+            failure_message:
+              "Use the function doc string `\"Drops blank labels and returns sorted uppercase labels.\"`."
+          ),
+          module_function(
+            CodiePlayground.ProofDocs,
+            :labels,
+            [[" mocha ", " ", "latte "]],
+            ["LATTE", "MOCHA"],
+            checkpoint: "`labels/1` should keep the documented behavior",
+            failure_message:
+              "`CodiePlayground.ProofDocs.labels([\" mocha \", \" \", \"latte \"])` should return `[\"LATTE\", \"MOCHA\"]`."
+          ),
+          returns(["LATTE", "MOCHA"],
+            checkpoint: "Return the documented behavior from the final call",
+            failure_message: "The final expression should evaluate to `[\"LATTE\", \"MOCHA\"]`."
+          )
+        ],
+        hints: [
+          "Keep the module doc short and add the function doc directly above `labels/1`.",
+          "Use the exact behavior sentence from the task so the docs stay concrete.",
+          "The implementation still needs to match the doc promise."
+        ],
+        quick_terms: [
+          quick_term(
+            "Function doc",
+            "A function doc explains the public behavior of one function and sits directly above its definition."
+          )
+        ],
+        rewards: reward(46, 1, 5, 5, 4, 1),
+        codex_entries_unlocked: [
+          codex(
+            "behavior-doc",
+            "Docs That Prove It",
+            "A good function doc states the behavior a fix now guarantees, not just the fact that a function exists.",
+            ~S|@doc "Drops blank labels and returns sorted uppercase labels."|,
+            "If the doc does not tell the reader what changed or what is guaranteed, it is probably too vague.",
+            "Use this when a public function's main promise should be visible right above the code."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "real-project-workflow-quality",
+        slug: "fix-explain-prove",
+        title: "Fix, Explain, Prove",
+        tier: :boss,
+        summary:
+          "Close a small quality ticket by fixing the behavior, documenting it, and capturing the proof case.",
+        teaching_markdown: """
+        What:
+        A complete small fix usually needs three things: the corrected behavior, a clear explanation, and one proof case that protects the change.
+
+        Example:
+        `%{fixed: [\"LATTE\", \"MOCHA\"], proof: %{test_name: \"filters blank labels\"}}`
+
+        Why:
+        That combination makes the fix easier to review today and easier to trust later.
+
+        Common cases:
+        Fix a small formatting bug and describe the corrected behavior
+        Leave one targeted regression case behind as proof
+
+        Watch out:
+        Do not let the docs and proof drift away from the actual fixed behavior.
+
+        Task:
+        Define `CodiePlayground.LabelTicket` with:
+        - `@moduledoc "Handles the blank-label fix for a tiny report."`
+        - `@doc "Drops blank labels and returns sorted uppercase labels."` above `labels/1`
+        - `labels/1` that trims, rejects blanks, uppercases, sorts, and returns the cleaned labels
+        - `proof/0` that returns `%{test_name: "filters blank labels", input: [" mocha ", " ", "latte "], expected: ["LATTE", "MOCHA"]}`
+
+        Make the final expression return:
+        `%{fixed: CodiePlayground.LabelTicket.labels([" mocha ", " ", "latte "]), proof: CodiePlayground.LabelTicket.proof()}`.
+        """,
+        starter_code: """
+        defmodule CodiePlayground.LabelTicket do
+          def labels(_raw), do: []
+          def proof, do: %{}
+        end
+
+        %{fixed: CodiePlayground.LabelTicket.labels([]), proof: CodiePlayground.LabelTicket.proof()}
+        """,
+        prerequisites: ["docs-that-prove-it"],
+        checks: [
+          ast_contains("@moduledoc",
+            checkpoint: "Document the module",
+            failure_message: "Add a `@moduledoc` for `CodiePlayground.LabelTicket`."
+          ),
+          ast_contains("@doc",
+            checkpoint: "Document the public fix",
+            failure_message: "Add an `@doc` directly above `labels/1`."
+          ),
+          source_contains("filters blank labels",
+            checkpoint: "Name the proof case",
+            failure_message: "Use the proof-case name `\"filters blank labels\"`."
+          ),
+          module_function(
+            CodiePlayground.LabelTicket,
+            :labels,
+            [[" mocha ", " ", "latte "]],
+            ["LATTE", "MOCHA"],
+            checkpoint: "`labels/1` should return the fixed labels",
+            failure_message:
+              "`CodiePlayground.LabelTicket.labels([\" mocha \", \" \", \"latte \"])` should return `[\"LATTE\", \"MOCHA\"]`."
+          ),
+          module_function(
+            CodiePlayground.LabelTicket,
+            :proof,
+            [],
+            %{
+              test_name: "filters blank labels",
+              input: [" mocha ", " ", "latte "],
+              expected: ["LATTE", "MOCHA"]
+            },
+            checkpoint: "`proof/0` should return the regression case",
+            failure_message:
+              "`CodiePlayground.LabelTicket.proof()` should return the named proof map for the blank-label fix."
+          ),
+          returns(
+            %{
+              fixed: ["LATTE", "MOCHA"],
+              proof: %{
+                test_name: "filters blank labels",
+                input: [" mocha ", " ", "latte "],
+                expected: ["LATTE", "MOCHA"]
+              }
+            },
+            checkpoint: "Return the fixed result and proof together",
+            failure_message:
+              "The final expression should evaluate to the map with both the fixed labels and the proof case."
+          )
+        ],
+        hints: [
+          "Keep `labels/1` focused on the fixed behavior from the earlier lessons.",
+          "`proof/0` should return the exact regression case, not recompute the labels.",
+          "The final expression should gather both outputs into one map."
+        ],
+        quick_terms: [
+          quick_term(
+            "Proof case",
+            "A proof case is the targeted regression example that shows a bug fix now holds."
+          )
+        ],
+        rewards: reward(62, 2, 6, 6, 5, 2),
+        codex_entries_unlocked: [
+          codex(
+            "quality-ticket",
+            "Fix, Explain, Prove",
+            "A complete small quality ticket fixes the behavior, explains the public promise, and leaves one focused proof case behind.",
+            "%{fixed: [\"LATTE\", \"MOCHA\"], proof: %{test_name: \"filters blank labels\"}}",
+            "A fix without proof is easy to regress, and proof without explanation is harder for the next reader to trust.",
+            "Use this pattern when you are closing a small bugfix ticket in a real project workflow."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "real-project-workflow-structure",
+        slug: "one-module-one-job",
+        title: "One Module, One Job",
+        summary:
+          "Start the structure pass by giving one focused module one clear responsibility.",
+        teaching_markdown: """
+        What:
+        A small project stays easier to read when each module owns one clear job.
+
+        Example:
+        `CodiePlayground.LabelCleaner.clean/1`
+
+        Why:
+        When a module has one job, you know where to change behavior and where not to pile extra concerns.
+
+        Common cases:
+        Put raw-input cleanup in one dedicated module
+        Keep formatting or reporting work out of the cleanup module
+
+        Watch out:
+        Do not make the first module solve the entire feature. Give it one clear responsibility first.
+
+        Task:
+        Define `CodiePlayground.LabelCleaner.clean/1`.
+        It should trim each label, reject blanks, uppercase the remaining labels, sort them, and return the cleaned list.
+
+        Make the final expression call `CodiePlayground.LabelCleaner.clean([" mocha ", " ", "latte "])`.
+        """,
+        starter_code: """
+        defmodule CodiePlayground.LabelCleaner do
+          def clean(_raw), do: []
+        end
+
+        CodiePlayground.LabelCleaner.clean([])
+        """,
+        prerequisites: ["fix-explain-prove"],
+        checks: [
+          source_contains("defmodule CodiePlayground.LabelCleaner",
+            checkpoint: "Define the cleaner module",
+            failure_message: "Define `CodiePlayground.LabelCleaner` as its own module."
+          ),
+          source_contains("def clean(",
+            checkpoint: "Define `clean/1`",
+            failure_message: "Define a public `clean/1` function."
+          ),
+          module_function(
+            CodiePlayground.LabelCleaner,
+            :clean,
+            [[" mocha ", " ", "latte "]],
+            ["LATTE", "MOCHA"],
+            checkpoint: "`clean/1` should return the cleaned labels",
+            failure_message:
+              "`CodiePlayground.LabelCleaner.clean([\" mocha \", \" \", \"latte \"])` should return `[\"LATTE\", \"MOCHA\"]`."
+          ),
+          returns(["LATTE", "MOCHA"],
+            checkpoint: "Return the cleaned labels from the final call",
+            failure_message: "The final expression should evaluate to `[\"LATTE\", \"MOCHA\"]`."
+          )
+        ],
+        hints: [
+          "Keep this module focused only on cleaning labels.",
+          "Trim first, then reject blanks, then uppercase and sort.",
+          "The final line should call `CodiePlayground.LabelCleaner.clean/1`."
+        ],
+        quick_terms: [
+          quick_term(
+            "Single responsibility",
+            "A module has single responsibility when it owns one clear job instead of several mixed concerns."
+          )
+        ],
+        rewards: reward(40, 1, 5, 5, 4, 1),
+        codex_entries_unlocked: [
+          codex(
+            "single-job-module",
+            "One Module, One Job",
+            "A focused module is easier to test, name, and reuse because it owns one clear responsibility.",
+            "CodiePlayground.LabelCleaner.clean(raw)",
+            "If a module both cleans data and builds reports, its boundary is probably too wide.",
+            "Use this when a small feature starts to feel easier to understand if one piece of work gets its own module."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "real-project-workflow-structure",
+        slug: "extract-helper-module",
+        title: "Extract Helper Module",
+        summary:
+          "Move the cleanup work into its own module and let the reporting module call it.",
+        teaching_markdown: """
+        What:
+        A helper module is a good next step when one chunk of logic deserves a reusable home outside the main feature module.
+
+        Example:
+        `items = CodiePlayground.LabelCleaner.clean(raw)`
+
+        Why:
+        Extraction makes the report module easier to scan because the cleanup details stop crowding the summary logic.
+
+        Common cases:
+        Move repeated cleanup into a dedicated helper module
+        Keep the report-building module focused on the final output shape
+
+        Watch out:
+        Extract a real unit of work, not a random half-step with no clear name.
+
+        Task:
+        Define `CodiePlayground.LabelCleaner.clean/1` for the cleanup job.
+        Define `CodiePlayground.LabelReport.summary/1` so it calls `CodiePlayground.LabelCleaner.clean/1`,
+        then returns `%{count: count, items: items, valid?: items != []}`.
+
+        Make the final expression call `CodiePlayground.LabelReport.summary([" mocha ", " ", "latte "])`.
+        """,
+        starter_code: """
+        defmodule CodiePlayground.LabelCleaner do
+          def clean(_raw), do: []
+        end
+
+        defmodule CodiePlayground.LabelReport do
+          def summary(_raw), do: %{count: 0, items: [], valid?: false}
+        end
+
+        CodiePlayground.LabelReport.summary([])
+        """,
+        prerequisites: ["one-module-one-job"],
+        checks: [
+          source_contains("CodiePlayground.LabelCleaner.clean",
+            checkpoint: "Use the helper module from the report module",
+            failure_message: "Call `CodiePlayground.LabelCleaner.clean/1` from `summary/1`."
+          ),
+          module_function(
+            CodiePlayground.LabelCleaner,
+            :clean,
+            [[" mocha ", " ", "latte "]],
+            ["LATTE", "MOCHA"],
+            checkpoint: "`clean/1` should still return the cleaned labels",
+            failure_message:
+              "`CodiePlayground.LabelCleaner.clean([\" mocha \", \" \", \"latte \"])` should return `[\"LATTE\", \"MOCHA\"]`."
+          ),
+          module_function(
+            CodiePlayground.LabelReport,
+            :summary,
+            [[" mocha ", " ", "latte "]],
+            %{count: 2, items: ["LATTE", "MOCHA"], valid?: true},
+            checkpoint: "`summary/1` should build the report from the helper output",
+            failure_message:
+              "`CodiePlayground.LabelReport.summary([\" mocha \", \" \", \"latte \"])` should return `%{count: 2, items: [\"LATTE\", \"MOCHA\"], valid?: true}`."
+          ),
+          returns(%{count: 2, items: ["LATTE", "MOCHA"], valid?: true},
+            checkpoint: "Return the report from the final call",
+            failure_message:
+              "The final expression should evaluate to `%{count: 2, items: [\"LATTE\", \"MOCHA\"], valid?: true}`."
+          )
+        ],
+        hints: [
+          "Let `LabelCleaner.clean/1` own the raw cleanup steps.",
+          "Count and package the already-cleaned items inside `LabelReport.summary/1`.",
+          "Use `items != []` for `valid?` so the empty case stays explicit."
+        ],
+        quick_terms: [
+          quick_term(
+            "Helper module",
+            "A helper module owns one reusable job that another module can call instead of re-embedding the same logic."
+          )
+        ],
+        rewards: reward(46, 1, 5, 5, 4, 1),
+        codex_entries_unlocked: [
+          codex(
+            "helper-module",
+            "Extract Helper Module",
+            "Move a real chunk of work into a named module when it deserves reuse or makes the main feature easier to read.",
+            "items = CodiePlayground.LabelCleaner.clean(raw)",
+            "Do not extract tiny helpers with vague names. Extract the part that already has a clear job.",
+            "Use this when a feature module reads better if one repeated or noisy concern gets its own module."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "real-project-workflow-structure",
+        slug: "name-the-boundary",
+        title: "Name the Boundary",
+        summary:
+          "Give the cleanup step and the summary step separate names so each module receives the right kind of input.",
+        teaching_markdown: """
+        What:
+        A good module boundary is not just code placement. It is also a clear handoff from one kind of value to the next.
+
+        Example:
+        `raw -> CodiePlayground.LabelCleaner.clean/1 -> items -> CodiePlayground.LabelSummary.build/1`
+
+        Why:
+        Once the boundary is named well, each module can stay smaller and easier to reason about.
+
+        Common cases:
+        Let one module accept raw input and another accept already-cleaned items
+        Keep summary-building code free from raw-input cleanup details
+
+        Watch out:
+        If both modules accept the same messy input, the boundary is probably still blurred.
+
+        Task:
+        Define `CodiePlayground.LabelCleaner.clean/1` to return cleaned labels.
+        Define `CodiePlayground.LabelSummary.build/1` to take already-cleaned labels and return `%{count: count, items: items, valid?: items != []}`.
+
+        Then bind `raw = [" mocha ", " ", "latte "]` and `items = CodiePlayground.LabelCleaner.clean(raw)`.
+        Return `CodiePlayground.LabelSummary.build(items)`.
+        """,
+        starter_code: """
+        defmodule CodiePlayground.LabelCleaner do
+          def clean(_raw), do: []
+        end
+
+        defmodule CodiePlayground.LabelSummary do
+          def build(_items), do: %{count: 0, items: [], valid?: false}
+        end
+
+        raw = []
+        items = []
+
+        CodiePlayground.LabelSummary.build(items)
+        """,
+        prerequisites: ["extract-helper-module"],
+        checks: [
+          binds(:items, ["LATTE", "MOCHA"],
+            checkpoint: "Pass cleaned items across the boundary",
+            failure_message:
+              "Bind `items` to the cleaned list `[\"LATTE\", \"MOCHA\"]` by calling `CodiePlayground.LabelCleaner.clean(raw)`."
+          ),
+          module_function(
+            CodiePlayground.LabelCleaner,
+            :clean,
+            [[" mocha ", " ", "latte "]],
+            ["LATTE", "MOCHA"],
+            checkpoint: "`clean/1` should define the cleanup boundary",
+            failure_message:
+              "`CodiePlayground.LabelCleaner.clean([\" mocha \", \" \", \"latte \"])` should return `[\"LATTE\", \"MOCHA\"]`."
+          ),
+          module_function(
+            CodiePlayground.LabelSummary,
+            :build,
+            [["LATTE", "MOCHA"]],
+            %{count: 2, items: ["LATTE", "MOCHA"], valid?: true},
+            checkpoint: "`build/1` should define the summary boundary",
+            failure_message:
+              "`CodiePlayground.LabelSummary.build([\"LATTE\", \"MOCHA\"])` should return `%{count: 2, items: [\"LATTE\", \"MOCHA\"], valid?: true}`."
+          ),
+          returns(%{count: 2, items: ["LATTE", "MOCHA"], valid?: true},
+            checkpoint: "Return the summary built from the cleaned items",
+            failure_message:
+              "The final expression should evaluate to `%{count: 2, items: [\"LATTE\", \"MOCHA\"], valid?: true}`."
+          )
+        ],
+        hints: [
+          "Let `raw` stay messy and let `items` be the already-cleaned list.",
+          "`LabelSummary.build/1` should not re-trim or re-filter the labels.",
+          "The boundary is clearer when each module accepts the right shape."
+        ],
+        quick_terms: [
+          quick_term(
+            "Module boundary",
+            "A module boundary is the handoff where one module finishes its job and passes the right value shape to the next module."
+          )
+        ],
+        rewards: reward(48, 1, 5, 5, 4, 1),
+        codex_entries_unlocked: [
+          codex(
+            "module-boundary",
+            "Name the Boundary",
+            "A strong module boundary means each module takes the right input shape and owns the right slice of work.",
+            "items = CodiePlayground.LabelCleaner.clean(raw)",
+            "If both modules keep reaching back into the same messy input, the boundary is still blurry.",
+            "Use this when you want the handoff between two modules to be obvious in both naming and data shape."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "real-project-workflow-structure",
+        slug: "wire-the-files-together",
+        title: "Wire the Files Together",
+        summary:
+          "Create the small feature module that aliases the focused modules and connects the flow cleanly.",
+        teaching_markdown: """
+        What:
+        Once the module boundaries are clear, a small feature module can wire them together into one readable call path.
+
+        Example:
+        `raw |> LabelCleaner.clean() |> LabelSummary.build()`
+
+        Why:
+        The feature module becomes the high-level story while the helper modules keep the details organized.
+
+        Common cases:
+        Alias the helper modules to keep the orchestration readable
+        Keep the wiring module focused on flow instead of re-embedding implementation details
+
+        Watch out:
+        The wiring module should coordinate the pieces, not absorb their jobs back into itself.
+
+        Task:
+        Define `CodiePlayground.LabelCleaner.clean/1` and `CodiePlayground.LabelSummary.build/1` as before.
+        Then define `CodiePlayground.LabelFeature.build/1`.
+        Inside `CodiePlayground.LabelFeature`, alias `CodiePlayground.LabelCleaner` and `CodiePlayground.LabelSummary`,
+        then wire the feature so `build/1` cleans the raw labels and builds the summary map.
+
+        Make the final expression call `CodiePlayground.LabelFeature.build([" mocha ", " ", "latte "])`.
+        """,
+        starter_code: """
+        defmodule CodiePlayground.LabelCleaner do
+          def clean(_raw), do: []
+        end
+
+        defmodule CodiePlayground.LabelSummary do
+          def build(_items), do: %{count: 0, items: [], valid?: false}
+        end
+
+        defmodule CodiePlayground.LabelFeature do
+          def build(_raw), do: %{}
+        end
+
+        CodiePlayground.LabelFeature.build([])
+        """,
+        prerequisites: ["name-the-boundary"],
+        checks: [
+          ast_contains("alias",
+            checkpoint: "Alias the focused modules",
+            failure_message:
+              "Use `alias` inside `CodiePlayground.LabelFeature` for the helper modules."
+          ),
+          source_contains("LabelCleaner.clean",
+            checkpoint: "Call the cleaner from the feature module",
+            failure_message: "Call `LabelCleaner.clean/1` from `build/1`."
+          ),
+          source_contains("LabelSummary.build",
+            checkpoint: "Call the summary module from the feature module",
+            failure_message: "Call `LabelSummary.build/1` from `build/1`."
+          ),
+          module_function(
+            CodiePlayground.LabelFeature,
+            :build,
+            [[" mocha ", " ", "latte "]],
+            %{count: 2, items: ["LATTE", "MOCHA"], valid?: true},
+            checkpoint: "`build/1` should wire the modules into the final summary",
+            failure_message:
+              "`CodiePlayground.LabelFeature.build([\" mocha \", \" \", \"latte \"])` should return `%{count: 2, items: [\"LATTE\", \"MOCHA\"], valid?: true}`."
+          ),
+          returns(%{count: 2, items: ["LATTE", "MOCHA"], valid?: true},
+            checkpoint: "Return the wired summary from the final call",
+            failure_message:
+              "The final expression should evaluate to `%{count: 2, items: [\"LATTE\", \"MOCHA\"], valid?: true}`."
+          )
+        ],
+        hints: [
+          "Alias the two helper modules inside `CodiePlayground.LabelFeature`.",
+          "`build/1` can stay very small when it only wires the two module calls together.",
+          "Keep the final expression as a call to `CodiePlayground.LabelFeature.build/1`."
+        ],
+        quick_terms: [
+          quick_term(
+            "Wiring module",
+            "A wiring module coordinates focused modules so the high-level feature flow stays readable in one place."
+          )
+        ],
+        rewards: reward(52, 1, 6, 5, 4, 1),
+        codex_entries_unlocked: [
+          codex(
+            "module-wiring",
+            "Wire the Files Together",
+            "A feature module can stay small when it wires focused modules together instead of re-owning their work.",
+            "raw |> LabelCleaner.clean() |> LabelSummary.build()",
+            "If the wiring module grows the full implementation again, the extraction did not really hold.",
+            "Use this when several small modules are ready and the feature now needs one readable entrypoint."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "real-project-workflow-structure",
+        slug: "refactor-without-changing-behavior",
+        title: "Refactor Without Changing Behavior",
+        summary:
+          "Move the work behind cleaner boundaries while keeping the public feature behavior exactly the same.",
+        teaching_markdown: """
+        What:
+        A safe refactor changes structure first and keeps the public result stable.
+
+        Example:
+        `LabelFeature.build(raw)` should still return the same summary map after the extraction.
+
+        Why:
+        In real project work, a structure change only counts as safe if the behavior stays the same for callers.
+
+        Common cases:
+        Move inline cleanup into a helper module without changing the final return shape
+        Keep the entrypoint stable while improving module boundaries underneath
+
+        Watch out:
+        If the output changes during a structure-only refactor, the change is not structure-only anymore.
+
+        Task:
+        The starter code already returns the right summary from `CodiePlayground.LabelFeature.build/1`.
+        Refactor it so `CodiePlayground.LabelCleaner.clean/1` owns the cleanup work and
+        `CodiePlayground.LabelSummary.build/1` owns the summary-map construction.
+        Keep `CodiePlayground.LabelFeature.build/1` returning the same summary map for both non-empty and empty inputs.
+
+        Make the final expression call `CodiePlayground.LabelFeature.build([" mocha ", " ", "latte "])`.
+        """,
+        starter_code: """
+        defmodule CodiePlayground.LabelCleaner do
+          def clean(_raw), do: []
+        end
+
+        defmodule CodiePlayground.LabelSummary do
+          def build(_items), do: %{count: 0, items: [], valid?: false}
+        end
+
+        defmodule CodiePlayground.LabelFeature do
+          def build(raw) do
+            items =
+              raw
+              |> Enum.map(&String.trim/1)
+              |> Enum.reject(&(&1 == ""))
+              |> Enum.map(&String.upcase/1)
+              |> Enum.sort()
+
+            %{count: Enum.count(items), items: items, valid?: items != []}
+          end
+        end
+
+        CodiePlayground.LabelFeature.build([" mocha ", " ", "latte "])
+        """,
+        prerequisites: ["wire-the-files-together"],
+        checks: [
+          source_contains("LabelCleaner.clean",
+            checkpoint: "Move cleanup into `LabelCleaner.clean/1`",
+            failure_message: "Refactor `build/1` to call `LabelCleaner.clean/1`."
+          ),
+          source_contains("LabelSummary.build",
+            checkpoint: "Move summary building into `LabelSummary.build/1`",
+            failure_message: "Refactor `build/1` to call `LabelSummary.build/1`."
+          ),
+          module_function(
+            CodiePlayground.LabelFeature,
+            :build,
+            [[" mocha ", " ", "latte "]],
+            %{count: 2, items: ["LATTE", "MOCHA"], valid?: true},
+            checkpoint: "`build/1` should keep the non-empty behavior",
+            failure_message:
+              "`CodiePlayground.LabelFeature.build([\" mocha \", \" \", \"latte \"])` should still return `%{count: 2, items: [\"LATTE\", \"MOCHA\"], valid?: true}`."
+          ),
+          module_function(
+            CodiePlayground.LabelFeature,
+            :build,
+            [[" ", "   "]],
+            %{count: 0, items: [], valid?: false},
+            checkpoint: "`build/1` should keep the empty-result behavior",
+            failure_message:
+              "`CodiePlayground.LabelFeature.build([\" \", \"   \"])` should still return `%{count: 0, items: [], valid?: false}`."
+          ),
+          returns(%{count: 2, items: ["LATTE", "MOCHA"], valid?: true},
+            checkpoint: "Return the same summary from the final call",
+            failure_message:
+              "The final expression should still evaluate to `%{count: 2, items: [\"LATTE\", \"MOCHA\"], valid?: true}`."
+          )
+        ],
+        hints: [
+          "Leave `LabelFeature.build/1` as the public entrypoint.",
+          "Move the cleanup steps into `LabelCleaner.clean/1` and the final map into `LabelSummary.build/1`.",
+          "Check both the non-empty and empty behaviors mentally before you finish."
+        ],
+        quick_terms: [
+          quick_term(
+            "Behavior-preserving refactor",
+            "A behavior-preserving refactor changes structure without changing what callers observe from the public function."
+          )
+        ],
+        rewards: reward(56, 1, 6, 6, 4, 1),
+        codex_entries_unlocked: [
+          codex(
+            "safe-refactor",
+            "Refactor Without Changing Behavior",
+            "A safe structure refactor keeps the public output stable while the code moves behind clearer boundaries.",
+            "LabelFeature.build(raw)",
+            "If the return shape changes, the refactor now includes a behavior change and needs different review.",
+            "Use this when you want cleaner module structure but callers should not notice any difference."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "real-project-workflow-structure",
+        slug: "small-feature-capstone",
+        title: "Small Feature Capstone",
+        tier: :boss,
+        summary:
+          "Ship one small structured feature across focused modules and keep the whole flow readable.",
+        teaching_markdown: """
+        What:
+        This capstone turns the structure lessons into one small feature with clear module jobs and one public entrypoint.
+
+        Example:
+        `OrderFeature.report(raw_orders)`
+
+        Why:
+        Real project work often means landing a feature that touches more than one file without dragging in extra architecture.
+
+        Common cases:
+        Split cleanup and report-building into focused modules
+        Keep one small public feature module that wires the pieces together
+
+        Watch out:
+        Keep the feature stateless and synchronous. This capstone is about structure, not processes or frameworks.
+
+        Task:
+        Define these modules:
+        - `CodiePlayground.OrderCleaner.clean/1` — keep only ready orders with nonblank drink names, trim the names, uppercase them, sort them, and return the cleaned list
+        - `CodiePlayground.OrderSummary.build/1` — return `%{count: count, items: items, valid?: items != []}` for the cleaned list
+        - `CodiePlayground.SmallFeature.report/1` — alias the two modules and wire the feature together
+
+        Make the final expression call:
+        `CodiePlayground.SmallFeature.report([%{drink: " mocha ", ready: true}, %{drink: "", ready: true}, %{drink: "latte", ready: true}, %{drink: "tea", ready: false}])`.
+        """,
+        starter_code: """
+        defmodule CodiePlayground.OrderCleaner do
+          def clean(_orders), do: []
+        end
+
+        defmodule CodiePlayground.OrderSummary do
+          def build(_items), do: %{count: 0, items: [], valid?: false}
+        end
+
+        defmodule CodiePlayground.SmallFeature do
+          def report(_orders), do: %{}
+        end
+
+        CodiePlayground.SmallFeature.report([])
+        """,
+        prerequisites: ["refactor-without-changing-behavior"],
+        checks: [
+          source_contains("defmodule CodiePlayground.OrderCleaner",
+            checkpoint: "Define the cleaner module",
+            failure_message: "Define `CodiePlayground.OrderCleaner` for the cleanup step."
+          ),
+          source_contains("defmodule CodiePlayground.OrderSummary",
+            checkpoint: "Define the summary module",
+            failure_message: "Define `CodiePlayground.OrderSummary` for the report step."
+          ),
+          ast_contains("alias",
+            checkpoint: "Alias the helper modules in the feature entrypoint",
+            failure_message:
+              "Use `alias` inside `CodiePlayground.SmallFeature` for the helper modules."
+          ),
+          module_function(
+            CodiePlayground.SmallFeature,
+            :report,
+            [
+              [
+                %{drink: " mocha ", ready: true},
+                %{drink: "", ready: true},
+                %{drink: "latte", ready: true},
+                %{drink: "tea", ready: false}
+              ]
+            ],
+            %{count: 2, items: ["LATTE", "MOCHA"], valid?: true},
+            checkpoint: "`report/1` should return the structured feature result",
+            failure_message:
+              "`CodiePlayground.SmallFeature.report([...])` should return `%{count: 2, items: [\"LATTE\", \"MOCHA\"], valid?: true}` for the provided ready orders."
+          ),
+          module_function(
+            CodiePlayground.SmallFeature,
+            :report,
+            [[%{drink: "", ready: true}, %{drink: "tea", ready: false}]],
+            %{count: 0, items: [], valid?: false},
+            checkpoint: "`report/1` should keep the empty-result behavior",
+            failure_message:
+              "`CodiePlayground.SmallFeature.report([%{drink: \"\", ready: true}, %{drink: \"tea\", ready: false}])` should return `%{count: 0, items: [], valid?: false}`."
+          ),
+          returns(%{count: 2, items: ["LATTE", "MOCHA"], valid?: true},
+            checkpoint: "Return the capstone feature result from the final call",
+            failure_message:
+              "The final expression should evaluate to `%{count: 2, items: [\"LATTE\", \"MOCHA\"], valid?: true}`."
+          )
+        ],
+        hints: [
+          "Keep `OrderCleaner.clean/1` focused on filtering and transforming the raw order maps into label strings.",
+          "Keep `OrderSummary.build/1` focused on the final summary-map shape.",
+          "Let `SmallFeature.report/1` be the one readable entrypoint that wires both modules together."
+        ],
+        quick_terms: [
+          quick_term(
+            "Capstone entrypoint",
+            "A capstone entrypoint is the one public function that ties the focused modules together into a small shippable feature."
+          )
+        ],
+        rewards: reward(70, 2, 7, 7, 5, 2),
+        codex_entries_unlocked: [
+          codex(
+            "small-feature-capstone",
+            "Small Feature Capstone",
+            "A small structured feature keeps each module focused and leaves one clear public entrypoint for callers.",
+            "CodiePlayground.SmallFeature.report(raw_orders)",
+            "Do not drag in extra architecture. This capstone is about small synchronous module structure.",
+            "Use this pattern when a feature is large enough to touch several modules but still small enough to stay simple and stateless."
           )
         ]
       ),

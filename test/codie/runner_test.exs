@@ -1283,6 +1283,479 @@ defmodule Codie.RunnerTest do
     assert result.status == :pass
   end
 
+  test "passes the real project workflow project map lesson" do
+    result =
+      Runner.submit(%Submission{
+        lesson_slug: "project-map",
+        code: """
+        repo_map = %{project_file: "mix.exs", app_dir: "lib", test_dir: "test"}
+        repo_map
+        """,
+        profile_id: 1,
+        attempt_number: 1
+      })
+
+    assert result.status == :pass
+  end
+
+  test "passes the real project workflow run the suite lesson" do
+    result =
+      Runner.submit(%Submission{
+        lesson_slug: "run-the-suite",
+        code: """
+        suite_command = "mix test"
+        {:full_suite, suite_command}
+        """,
+        profile_id: 1,
+        attempt_number: 1
+      })
+
+    assert result.status == :pass
+  end
+
+  test "passes the real project workflow target one failure lesson" do
+    result =
+      Runner.submit(%Submission{
+        lesson_slug: "target-one-failure",
+        code: """
+        failing_file = "test/codie/runner_test.exs"
+        targeted_command = "mix test " <> failing_file
+        targeted_command
+        """,
+        profile_id: 1,
+        attempt_number: 1
+      })
+
+    assert result.status == :pass
+  end
+
+  test "passes the real project workflow compile first lesson" do
+    result =
+      Runner.submit(%Submission{
+        lesson_slug: "compile-first",
+        code: """
+        next_step = {:compile_error, "mix compile"}
+        next_step
+        """,
+        profile_id: 1,
+        attempt_number: 1
+      })
+
+    assert result.status == :pass
+  end
+
+  test "passes the real project workflow ask mix for help lesson" do
+    result =
+      Runner.submit(%Submission{
+        lesson_slug: "ask-mix-for-help",
+        code: """
+        help_command = "mix help test"
+        {:need_task_help, help_command}
+        """,
+        profile_id: 1,
+        attempt_number: 1
+      })
+
+    assert result.status == :pass
+  end
+
+  test "passes the real project workflow first day in the repo boss lesson" do
+    result =
+      Runner.submit(%Submission{
+        lesson_slug: "first-day-in-the-repo",
+        code: """
+        defmodule CodiePlayground.FirstDay do
+          def plan(failing_file) do
+            %{
+              project_file: "mix.exs",
+              app_dir: "lib",
+              test_dir: "test",
+              suite_command: "mix test",
+              targeted_command: "mix test " <> failing_file,
+              compile_command: "mix compile",
+              help_command: "mix help test"
+            }
+          end
+        end
+
+        CodiePlayground.FirstDay.plan("test/codie/runner_test.exs")
+        """,
+        profile_id: 1,
+        attempt_number: 1
+      })
+
+    assert result.status == :pass
+  end
+
+  test "passes the real project workflow read the assertion lesson" do
+    result =
+      Runner.submit(%Submission{
+        lesson_slug: "read-the-assertion",
+        code: """
+        expected = ["LATTE", "MOCHA"]
+        actual = ["", "LATTE", "MOCHA"]
+        clue = :blank_label
+
+        %{expected: expected, actual: actual, clue: clue}
+        """,
+        profile_id: 1,
+        attempt_number: 1
+      })
+
+    assert result.status == :pass
+  end
+
+  test "passes the real project workflow write the missing test lesson" do
+    result =
+      Runner.submit(%Submission{
+        lesson_slug: "write-the-missing-test",
+        code: """
+        test_name = "filters blank labels"
+        new_case = %{input: [" mocha ", " ", "latte "], expected: ["LATTE", "MOCHA"]}
+
+        {test_name, new_case}
+        """,
+        profile_id: 1,
+        attempt_number: 1
+      })
+
+    assert result.status == :pass
+  end
+
+  test "passes the real project workflow debug with purpose lesson" do
+    result =
+      Runner.submit(%Submission{
+        lesson_slug: "debug-with-purpose",
+        code: """
+        defmodule CodiePlayground.DebugLabel do
+          def labels(raw) do
+            cleaned =
+              raw
+              |> Enum.map(&String.trim/1)
+              |> Enum.reject(&(&1 == ""))
+              |> IO.inspect(label: "cleaned")
+
+            cleaned
+            |> Enum.map(&String.upcase/1)
+            |> Enum.sort()
+          end
+        end
+
+        CodiePlayground.DebugLabel.labels([" mocha ", " ", "latte "])
+        """,
+        profile_id: 1,
+        attempt_number: 1
+      })
+
+    assert result.status == :pass
+  end
+
+  test "passes the real project workflow document the module lesson" do
+    result =
+      Runner.submit(%Submission{
+        lesson_slug: "document-the-module",
+        code: """
+        defmodule CodiePlayground.LabelDocs do
+          @moduledoc "Builds cleaned labels for a small report."
+
+          def labels(raw) do
+            raw
+            |> Enum.map(&String.trim/1)
+            |> Enum.reject(&(&1 == ""))
+            |> Enum.map(&String.upcase/1)
+            |> Enum.sort()
+          end
+        end
+
+        CodiePlayground.LabelDocs.labels([" mocha ", " ", "latte "])
+        """,
+        profile_id: 1,
+        attempt_number: 1
+      })
+
+    assert result.status == :pass
+  end
+
+  test "passes the real project workflow docs that prove it lesson" do
+    result =
+      Runner.submit(%Submission{
+        lesson_slug: "docs-that-prove-it",
+        code: """
+        defmodule CodiePlayground.ProofDocs do
+          @moduledoc "Formats labels for a tiny report."
+          @doc "Drops blank labels and returns sorted uppercase labels."
+          def labels(raw) do
+            raw
+            |> Enum.map(&String.trim/1)
+            |> Enum.reject(&(&1 == ""))
+            |> Enum.map(&String.upcase/1)
+            |> Enum.sort()
+          end
+        end
+
+        CodiePlayground.ProofDocs.labels([" mocha ", " ", "latte "])
+        """,
+        profile_id: 1,
+        attempt_number: 1
+      })
+
+    assert result.status == :pass
+  end
+
+  test "passes the real project workflow fix explain prove boss lesson" do
+    result =
+      Runner.submit(%Submission{
+        lesson_slug: "fix-explain-prove",
+        code: """
+        defmodule CodiePlayground.LabelTicket do
+          @moduledoc "Handles the blank-label fix for a tiny report."
+          @doc "Drops blank labels and returns sorted uppercase labels."
+          def labels(raw) do
+            raw
+            |> Enum.map(&String.trim/1)
+            |> Enum.reject(&(&1 == ""))
+            |> Enum.map(&String.upcase/1)
+            |> Enum.sort()
+          end
+
+          def proof do
+            %{
+              test_name: "filters blank labels",
+              input: [" mocha ", " ", "latte "],
+              expected: ["LATTE", "MOCHA"]
+            }
+          end
+        end
+
+        %{
+          fixed: CodiePlayground.LabelTicket.labels([" mocha ", " ", "latte "]),
+          proof: CodiePlayground.LabelTicket.proof()
+        }
+        """,
+        profile_id: 1,
+        attempt_number: 1
+      })
+
+    assert result.status == :pass
+  end
+
+  test "passes the real project workflow one module one job lesson" do
+    result =
+      Runner.submit(%Submission{
+        lesson_slug: "one-module-one-job",
+        code: """
+        defmodule CodiePlayground.LabelCleaner do
+          def clean(raw) do
+            raw
+            |> Enum.map(&String.trim/1)
+            |> Enum.reject(&(&1 == ""))
+            |> Enum.map(&String.upcase/1)
+            |> Enum.sort()
+          end
+        end
+
+        CodiePlayground.LabelCleaner.clean([" mocha ", " ", "latte "])
+        """,
+        profile_id: 1,
+        attempt_number: 1
+      })
+
+    assert result.status == :pass
+  end
+
+  test "passes the real project workflow extract helper module lesson" do
+    result =
+      Runner.submit(%Submission{
+        lesson_slug: "extract-helper-module",
+        code: """
+        defmodule CodiePlayground.LabelCleaner do
+          def clean(raw) do
+            raw
+            |> Enum.map(&String.trim/1)
+            |> Enum.reject(&(&1 == ""))
+            |> Enum.map(&String.upcase/1)
+            |> Enum.sort()
+          end
+        end
+
+        defmodule CodiePlayground.LabelReport do
+          def summary(raw) do
+            items = CodiePlayground.LabelCleaner.clean(raw)
+            %{count: Enum.count(items), items: items, valid?: items != []}
+          end
+        end
+
+        CodiePlayground.LabelReport.summary([" mocha ", " ", "latte "])
+        """,
+        profile_id: 1,
+        attempt_number: 1
+      })
+
+    assert result.status == :pass
+  end
+
+  test "passes the real project workflow name the boundary lesson" do
+    result =
+      Runner.submit(%Submission{
+        lesson_slug: "name-the-boundary",
+        code: """
+        defmodule CodiePlayground.LabelCleaner do
+          def clean(raw) do
+            raw
+            |> Enum.map(&String.trim/1)
+            |> Enum.reject(&(&1 == ""))
+            |> Enum.map(&String.upcase/1)
+            |> Enum.sort()
+          end
+        end
+
+        defmodule CodiePlayground.LabelSummary do
+          def build(items) do
+            %{count: Enum.count(items), items: items, valid?: items != []}
+          end
+        end
+
+        raw = [" mocha ", " ", "latte "]
+        items = CodiePlayground.LabelCleaner.clean(raw)
+
+        CodiePlayground.LabelSummary.build(items)
+        """,
+        profile_id: 1,
+        attempt_number: 1
+      })
+
+    assert result.status == :pass
+  end
+
+  test "passes the real project workflow wire the files together lesson" do
+    result =
+      Runner.submit(%Submission{
+        lesson_slug: "wire-the-files-together",
+        code: """
+        defmodule CodiePlayground.LabelCleaner do
+          def clean(raw) do
+            raw
+            |> Enum.map(&String.trim/1)
+            |> Enum.reject(&(&1 == ""))
+            |> Enum.map(&String.upcase/1)
+            |> Enum.sort()
+          end
+        end
+
+        defmodule CodiePlayground.LabelSummary do
+          def build(items) do
+            %{count: Enum.count(items), items: items, valid?: items != []}
+          end
+        end
+
+        defmodule CodiePlayground.LabelFeature do
+          alias CodiePlayground.LabelCleaner
+          alias CodiePlayground.LabelSummary
+
+          def build(raw) do
+            raw
+            |> LabelCleaner.clean()
+            |> LabelSummary.build()
+          end
+        end
+
+        CodiePlayground.LabelFeature.build([" mocha ", " ", "latte "])
+        """,
+        profile_id: 1,
+        attempt_number: 1
+      })
+
+    assert result.status == :pass
+  end
+
+  test "passes the real project workflow refactor without changing behavior lesson" do
+    result =
+      Runner.submit(%Submission{
+        lesson_slug: "refactor-without-changing-behavior",
+        code: """
+        defmodule CodiePlayground.LabelCleaner do
+          def clean(raw) do
+            raw
+            |> Enum.map(&String.trim/1)
+            |> Enum.reject(&(&1 == ""))
+            |> Enum.map(&String.upcase/1)
+            |> Enum.sort()
+          end
+        end
+
+        defmodule CodiePlayground.LabelSummary do
+          def build(items) do
+            %{count: Enum.count(items), items: items, valid?: items != []}
+          end
+        end
+
+        defmodule CodiePlayground.LabelFeature do
+          alias CodiePlayground.LabelCleaner
+          alias CodiePlayground.LabelSummary
+
+          def build(raw) do
+            raw
+            |> LabelCleaner.clean()
+            |> LabelSummary.build()
+          end
+        end
+
+        CodiePlayground.LabelFeature.build([" mocha ", " ", "latte "])
+        """,
+        profile_id: 1,
+        attempt_number: 1
+      })
+
+    assert result.status == :pass
+  end
+
+  test "passes the real project workflow small feature capstone boss lesson" do
+    result =
+      Runner.submit(%Submission{
+        lesson_slug: "small-feature-capstone",
+        code: """
+        defmodule CodiePlayground.OrderCleaner do
+          def clean(orders) do
+            orders
+            |> Enum.filter(fn order -> order.ready end)
+            |> Enum.map(fn order -> String.trim(order.drink) end)
+            |> Enum.reject(&(&1 == ""))
+            |> Enum.map(&String.upcase/1)
+            |> Enum.sort()
+          end
+        end
+
+        defmodule CodiePlayground.OrderSummary do
+          def build(items) do
+            %{count: Enum.count(items), items: items, valid?: items != []}
+          end
+        end
+
+        defmodule CodiePlayground.SmallFeature do
+          alias CodiePlayground.OrderCleaner
+          alias CodiePlayground.OrderSummary
+
+          def report(orders) do
+            orders
+            |> OrderCleaner.clean()
+            |> OrderSummary.build()
+          end
+        end
+
+        CodiePlayground.SmallFeature.report([
+          %{drink: " mocha ", ready: true},
+          %{drink: "", ready: true},
+          %{drink: "latte", ready: true},
+          %{drink: "tea", ready: false}
+        ])
+        """,
+        profile_id: 1,
+        attempt_number: 1
+      })
+
+    assert result.status == :pass
+  end
+
   test "passes the interpolation lesson" do
     result =
       Runner.submit(%Submission{

@@ -58,6 +58,24 @@ defmodule Codie.CurriculumTest do
              &(&1.slug == "working-with-data-workflows" and
                  &1.title == "Working with Data: Small Workflows")
            )
+
+    assert Enum.any?(
+             tracks,
+             &(&1.slug == "real-project-workflow-mix" and
+                 &1.title == "Real Project Workflow: Mix and Project Navigation")
+           )
+
+    assert Enum.any?(
+             tracks,
+             &(&1.slug == "real-project-workflow-quality" and
+                 &1.title == "Real Project Workflow: Tests, Debugging, and Docs")
+           )
+
+    assert Enum.any?(
+             tracks,
+             &(&1.slug == "real-project-workflow-structure" and
+                 &1.title == "Real Project Workflow: Multi-file Modules")
+           )
   end
 
   test "foundations lessons are ordered by prerequisites" do
@@ -194,6 +212,15 @@ defmodule Codie.CurriculumTest do
              Enum.find_index(slugs, &(&1 == "working-with-data-workflows"))
 
     assert Enum.find_index(slugs, &(&1 == "working-with-data-workflows")) <
+             Enum.find_index(slugs, &(&1 == "real-project-workflow-mix"))
+
+    assert Enum.find_index(slugs, &(&1 == "real-project-workflow-mix")) <
+             Enum.find_index(slugs, &(&1 == "real-project-workflow-quality"))
+
+    assert Enum.find_index(slugs, &(&1 == "real-project-workflow-quality")) <
+             Enum.find_index(slugs, &(&1 == "real-project-workflow-structure"))
+
+    assert Enum.find_index(slugs, &(&1 == "real-project-workflow-structure")) <
              Enum.find_index(slugs, &(&1 == "foundations-old"))
   end
 
@@ -245,6 +272,69 @@ defmodule Codie.CurriculumTest do
     assert hd(lessons).slug == "summary-module"
     assert List.last(lessons).slug == "workflow-report-roundup"
     assert Enum.at(lessons, 0).prerequisites == ["shapes-results-roundup"]
+
+    slugs = Enum.map(lessons, & &1.slug)
+
+    Enum.each(lessons, fn lesson ->
+      Enum.each(lesson.prerequisites, fn prerequisite ->
+        prerequisite_index = Enum.find_index(slugs, &(&1 == prerequisite))
+        lesson_index = Enum.find_index(slugs, &(&1 == lesson.slug))
+
+        if prerequisite_index do
+          assert prerequisite_index < lesson_index
+        end
+      end)
+    end)
+  end
+
+  test "real project workflow mix lessons are ordered by prerequisites" do
+    lessons = Curriculum.list_lessons("real-project-workflow-mix")
+
+    assert hd(lessons).slug == "project-map"
+    assert List.last(lessons).slug == "first-day-in-the-repo"
+    assert Enum.at(lessons, 0).prerequisites == ["workflow-report-roundup"]
+
+    slugs = Enum.map(lessons, & &1.slug)
+
+    Enum.each(lessons, fn lesson ->
+      Enum.each(lesson.prerequisites, fn prerequisite ->
+        prerequisite_index = Enum.find_index(slugs, &(&1 == prerequisite))
+        lesson_index = Enum.find_index(slugs, &(&1 == lesson.slug))
+
+        if prerequisite_index do
+          assert prerequisite_index < lesson_index
+        end
+      end)
+    end)
+  end
+
+  test "real project workflow quality lessons are ordered by prerequisites" do
+    lessons = Curriculum.list_lessons("real-project-workflow-quality")
+
+    assert hd(lessons).slug == "read-the-assertion"
+    assert List.last(lessons).slug == "fix-explain-prove"
+    assert Enum.at(lessons, 0).prerequisites == ["first-day-in-the-repo"]
+
+    slugs = Enum.map(lessons, & &1.slug)
+
+    Enum.each(lessons, fn lesson ->
+      Enum.each(lesson.prerequisites, fn prerequisite ->
+        prerequisite_index = Enum.find_index(slugs, &(&1 == prerequisite))
+        lesson_index = Enum.find_index(slugs, &(&1 == lesson.slug))
+
+        if prerequisite_index do
+          assert prerequisite_index < lesson_index
+        end
+      end)
+    end)
+  end
+
+  test "real project workflow structure lessons are ordered by prerequisites" do
+    lessons = Curriculum.list_lessons("real-project-workflow-structure")
+
+    assert hd(lessons).slug == "one-module-one-job"
+    assert List.last(lessons).slug == "small-feature-capstone"
+    assert Enum.at(lessons, 0).prerequisites == ["fix-explain-prove"]
 
     slugs = Enum.map(lessons, & &1.slug)
 
@@ -359,7 +449,7 @@ defmodule Codie.CurriculumTest do
     assert linked == ["enum-map-lab"]
   end
 
-  test "linked next lessons cross into the new working with data wave" do
+  test "linked next lessons cross into the post-foundations workflow waves" do
     linked_after_enum =
       Curriculum.linked_next_lessons(
         ["enumeration-streams-roundup"],
@@ -378,9 +468,24 @@ defmodule Codie.CurriculumTest do
       Curriculum.linked_next_lessons(["shapes-results-roundup"], "shapes-results-roundup")
       |> Enum.map(& &1.slug)
 
+    linked_after_workflow =
+      Curriculum.linked_next_lessons(["workflow-report-roundup"], "workflow-report-roundup")
+      |> Enum.map(& &1.slug)
+
+    linked_after_mix =
+      Curriculum.linked_next_lessons(["first-day-in-the-repo"], "first-day-in-the-repo")
+      |> Enum.map(& &1.slug)
+
+    linked_after_quality =
+      Curriculum.linked_next_lessons(["fix-explain-prove"], "fix-explain-prove")
+      |> Enum.map(& &1.slug)
+
     assert linked_after_enum == ["filter-tray"]
     assert linked_after_collections == ["refresh-order"]
     assert linked_after_shapes == ["summary-module"]
+    assert linked_after_workflow == ["project-map"]
+    assert linked_after_mix == ["read-the-assertion"]
+    assert linked_after_quality == ["one-module-one-job"]
   end
 
   test "next_lesson_in_track returns the immediate track-local next lesson" do
@@ -388,7 +493,19 @@ defmodule Codie.CurriculumTest do
     assert Curriculum.next_lesson_in_track("control-flow-with-roundup") == nil
     assert Curriculum.next_lesson_in_track("enumeration-streams-roundup") == nil
     assert Curriculum.next_lesson_in_track("filter-tray").slug == "find-cup"
+    assert Curriculum.next_lesson_in_track("project-map").slug == "run-the-suite"
+    assert Curriculum.next_lesson_in_track("ask-mix-for-help").slug == "first-day-in-the-repo"
+    assert Curriculum.next_lesson_in_track("read-the-assertion").slug == "write-the-missing-test"
+    assert Curriculum.next_lesson_in_track("docs-that-prove-it").slug == "fix-explain-prove"
+    assert Curriculum.next_lesson_in_track("one-module-one-job").slug == "extract-helper-module"
+
+    assert Curriculum.next_lesson_in_track("refactor-without-changing-behavior").slug ==
+             "small-feature-capstone"
+
     assert Curriculum.next_lesson_in_track("workflow-report-roundup") == nil
+    assert Curriculum.next_lesson_in_track("first-day-in-the-repo") == nil
+    assert Curriculum.next_lesson_in_track("fix-explain-prove") == nil
+    assert Curriculum.next_lesson_in_track("small-feature-capstone") == nil
   end
 
   test "enum/stream track is seeded with eager and lazy fundamentals" do
@@ -435,6 +552,45 @@ defmodule Codie.CurriculumTest do
              "tagged-path",
              "with-lane",
              "workflow-report-roundup"
+           ]
+  end
+
+  test "real project workflow mix track is seeded with the approved Track 1 lessons" do
+    slugs = Curriculum.list_lessons("real-project-workflow-mix") |> Enum.map(& &1.slug)
+
+    assert slugs == [
+             "project-map",
+             "run-the-suite",
+             "target-one-failure",
+             "compile-first",
+             "ask-mix-for-help",
+             "first-day-in-the-repo"
+           ]
+  end
+
+  test "real project workflow quality track is seeded with the approved Track 2 lessons" do
+    slugs = Curriculum.list_lessons("real-project-workflow-quality") |> Enum.map(& &1.slug)
+
+    assert slugs == [
+             "read-the-assertion",
+             "write-the-missing-test",
+             "debug-with-purpose",
+             "document-the-module",
+             "docs-that-prove-it",
+             "fix-explain-prove"
+           ]
+  end
+
+  test "real project workflow structure track is seeded with the approved Track 3 lessons" do
+    slugs = Curriculum.list_lessons("real-project-workflow-structure") |> Enum.map(& &1.slug)
+
+    assert slugs == [
+             "one-module-one-job",
+             "extract-helper-module",
+             "name-the-boundary",
+             "wire-the-files-together",
+             "refactor-without-changing-behavior",
+             "small-feature-capstone"
            ]
   end
 
@@ -527,7 +683,25 @@ defmodule Codie.CurriculumTest do
           "pipe-line",
           "tagged-path",
           "with-lane",
-          "workflow-report-roundup"
+          "workflow-report-roundup",
+          "project-map",
+          "run-the-suite",
+          "target-one-failure",
+          "compile-first",
+          "ask-mix-for-help",
+          "first-day-in-the-repo",
+          "read-the-assertion",
+          "write-the-missing-test",
+          "debug-with-purpose",
+          "document-the-module",
+          "docs-that-prove-it",
+          "fix-explain-prove",
+          "one-module-one-job",
+          "extract-helper-module",
+          "name-the-boundary",
+          "wire-the-files-together",
+          "refactor-without-changing-behavior",
+          "small-feature-capstone"
         ] do
       lesson = Curriculum.get_lesson!(slug)
       assert lesson.teaching_markdown =~ "Common cases:"
@@ -593,7 +767,25 @@ defmodule Codie.CurriculumTest do
           "pipe-line",
           "tagged-path",
           "with-lane",
-          "workflow-report-roundup"
+          "workflow-report-roundup",
+          "project-map",
+          "run-the-suite",
+          "target-one-failure",
+          "compile-first",
+          "ask-mix-for-help",
+          "first-day-in-the-repo",
+          "read-the-assertion",
+          "write-the-missing-test",
+          "debug-with-purpose",
+          "document-the-module",
+          "docs-that-prove-it",
+          "fix-explain-prove",
+          "one-module-one-job",
+          "extract-helper-module",
+          "name-the-boundary",
+          "wire-the-files-together",
+          "refactor-without-changing-behavior",
+          "small-feature-capstone"
         ] do
       lesson = Curriculum.get_lesson!(slug)
       assert length(lesson.quick_terms) > 0
