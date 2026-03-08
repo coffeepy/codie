@@ -9,6 +9,12 @@ defmodule Codie.Curriculum do
 
   def list_tracks, do: Catalog.tracks()
 
+  def active_tracks, do: list_tracks() |> active_tracks()
+
+  def active_tracks(tracks) when is_list(tracks) do
+    Enum.reject(tracks, &archived_track?/1)
+  end
+
   def get_track!(slug) do
     Enum.find(list_tracks(), &(&1.slug == slug)) ||
       raise ArgumentError, "unknown track #{inspect(slug)}"
@@ -31,6 +37,12 @@ defmodule Codie.Curriculum do
   end
 
   def archived_track_slugs, do: ["foundations-old"]
+
+  def archived_track?(%{slug: track_slug}), do: archived_track?(track_slug)
+  def archived_track?(%{track_slug: track_slug}), do: archived_track?(track_slug)
+
+  def archived_track?(track_slug) when is_binary(track_slug),
+    do: track_slug in archived_track_slugs()
 
   def progression_lessons do
     list_lessons()

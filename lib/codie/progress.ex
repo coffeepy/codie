@@ -43,7 +43,7 @@ defmodule Codie.Progress do
     %{
       profile: profile,
       next_lesson: Curriculum.next_lesson_for_profile(profile),
-      track_progress: list_track_progress(profile),
+      track_progress: list_active_track_progress(profile),
       recent_runs: recent_runs(profile),
       unlocked_entries: unlocked_codex_entries(profile)
     }
@@ -261,6 +261,12 @@ defmodule Codie.Progress do
     |> where([track_progress], track_progress.profile_id == ^profile.id)
     |> Repo.all()
     |> Enum.sort_by(&Curriculum.track_index(&1.track_slug))
+  end
+
+  def list_active_track_progress(%Profile{} = profile) do
+    profile
+    |> list_track_progress()
+    |> Curriculum.active_tracks()
   end
 
   def list_lesson_progress(%Profile{} = profile) do

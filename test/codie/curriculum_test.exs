@@ -40,6 +40,24 @@ defmodule Codie.CurriculumTest do
              &(&1.slug == "foundations-enum-and-streams" and
                  &1.title == "Foundations: Enumeration and Streams")
            )
+
+    assert Enum.any?(
+             tracks,
+             &(&1.slug == "working-with-data-collections" and
+                 &1.title == "Working with Data: Collection Workflows")
+           )
+
+    assert Enum.any?(
+             tracks,
+             &(&1.slug == "working-with-data-shapes-results" and
+                 &1.title == "Working with Data: Shapes and Results")
+           )
+
+    assert Enum.any?(
+             tracks,
+             &(&1.slug == "working-with-data-workflows" and
+                 &1.title == "Working with Data: Small Workflows")
+           )
   end
 
   test "foundations lessons are ordered by prerequisites" do
@@ -163,6 +181,85 @@ defmodule Codie.CurriculumTest do
     end)
   end
 
+  test "working with data tracks follow the active foundations sequence before the legacy archive" do
+    slugs = Curriculum.list_tracks() |> Enum.map(& &1.slug)
+
+    assert Enum.find_index(slugs, &(&1 == "foundations-enum-and-streams")) <
+             Enum.find_index(slugs, &(&1 == "working-with-data-collections"))
+
+    assert Enum.find_index(slugs, &(&1 == "working-with-data-collections")) <
+             Enum.find_index(slugs, &(&1 == "working-with-data-shapes-results"))
+
+    assert Enum.find_index(slugs, &(&1 == "working-with-data-shapes-results")) <
+             Enum.find_index(slugs, &(&1 == "working-with-data-workflows"))
+
+    assert Enum.find_index(slugs, &(&1 == "working-with-data-workflows")) <
+             Enum.find_index(slugs, &(&1 == "foundations-old"))
+  end
+
+  test "working with data collection lessons are ordered by prerequisites" do
+    lessons = Curriculum.list_lessons("working-with-data-collections")
+
+    assert hd(lessons).slug == "filter-tray"
+    assert List.last(lessons).slug == "collection-workflows-roundup"
+    assert Enum.at(lessons, 0).prerequisites == ["enumeration-streams-roundup"]
+
+    slugs = Enum.map(lessons, & &1.slug)
+
+    Enum.each(lessons, fn lesson ->
+      Enum.each(lesson.prerequisites, fn prerequisite ->
+        prerequisite_index = Enum.find_index(slugs, &(&1 == prerequisite))
+        lesson_index = Enum.find_index(slugs, &(&1 == lesson.slug))
+
+        if prerequisite_index do
+          assert prerequisite_index < lesson_index
+        end
+      end)
+    end)
+  end
+
+  test "working with data shapes/results lessons are ordered by prerequisites" do
+    lessons = Curriculum.list_lessons("working-with-data-shapes-results")
+
+    assert hd(lessons).slug == "refresh-order"
+    assert List.last(lessons).slug == "shapes-results-roundup"
+    assert Enum.at(lessons, 0).prerequisites == ["collection-workflows-roundup"]
+
+    slugs = Enum.map(lessons, & &1.slug)
+
+    Enum.each(lessons, fn lesson ->
+      Enum.each(lesson.prerequisites, fn prerequisite ->
+        prerequisite_index = Enum.find_index(slugs, &(&1 == prerequisite))
+        lesson_index = Enum.find_index(slugs, &(&1 == lesson.slug))
+
+        if prerequisite_index do
+          assert prerequisite_index < lesson_index
+        end
+      end)
+    end)
+  end
+
+  test "working with data workflow lessons are ordered by prerequisites" do
+    lessons = Curriculum.list_lessons("working-with-data-workflows")
+
+    assert hd(lessons).slug == "summary-module"
+    assert List.last(lessons).slug == "workflow-report-roundup"
+    assert Enum.at(lessons, 0).prerequisites == ["shapes-results-roundup"]
+
+    slugs = Enum.map(lessons, & &1.slug)
+
+    Enum.each(lessons, fn lesson ->
+      Enum.each(lesson.prerequisites, fn prerequisite ->
+        prerequisite_index = Enum.find_index(slugs, &(&1 == prerequisite))
+        lesson_index = Enum.find_index(slugs, &(&1 == lesson.slug))
+
+        if prerequisite_index do
+          assert prerequisite_index < lesson_index
+        end
+      end)
+    end)
+  end
+
   test "foundations keeps the practical daily-use lessons and moves low-value lessons out" do
     slugs = Curriculum.list_lessons("foundations") |> Enum.map(& &1.slug)
 
@@ -262,10 +359,36 @@ defmodule Codie.CurriculumTest do
     assert linked == ["enum-map-lab"]
   end
 
+  test "linked next lessons cross into the new working with data wave" do
+    linked_after_enum =
+      Curriculum.linked_next_lessons(
+        ["enumeration-streams-roundup"],
+        "enumeration-streams-roundup"
+      )
+      |> Enum.map(& &1.slug)
+
+    linked_after_collections =
+      Curriculum.linked_next_lessons(
+        ["collection-workflows-roundup"],
+        "collection-workflows-roundup"
+      )
+      |> Enum.map(& &1.slug)
+
+    linked_after_shapes =
+      Curriculum.linked_next_lessons(["shapes-results-roundup"], "shapes-results-roundup")
+      |> Enum.map(& &1.slug)
+
+    assert linked_after_enum == ["filter-tray"]
+    assert linked_after_collections == ["refresh-order"]
+    assert linked_after_shapes == ["summary-module"]
+  end
+
   test "next_lesson_in_track returns the immediate track-local next lesson" do
     assert Curriculum.next_lesson_in_track("control-flow-if-unless").slug == "control-flow-case"
     assert Curriculum.next_lesson_in_track("control-flow-with-roundup") == nil
     assert Curriculum.next_lesson_in_track("enumeration-streams-roundup") == nil
+    assert Curriculum.next_lesson_in_track("filter-tray").slug == "find-cup"
+    assert Curriculum.next_lesson_in_track("workflow-report-roundup") == nil
   end
 
   test "enum/stream track is seeded with eager and lazy fundamentals" do
@@ -276,6 +399,43 @@ defmodule Codie.CurriculumTest do
     assert "enum-eager-lab" in slugs
     assert "stream-lazy-lab" in slugs
     assert "enumeration-streams-roundup" in slugs
+  end
+
+  test "working with data tracks are seeded with the next wave lessons" do
+    collection_slugs =
+      Curriculum.list_lessons("working-with-data-collections") |> Enum.map(& &1.slug)
+
+    shapes_slugs =
+      Curriculum.list_lessons("working-with-data-shapes-results") |> Enum.map(& &1.slug)
+
+    workflow_slugs = Curriculum.list_lessons("working-with-data-workflows") |> Enum.map(& &1.slug)
+
+    assert collection_slugs == [
+             "filter-tray",
+             "find-cup",
+             "count-batch",
+             "all-ready",
+             "sort-board",
+             "collection-workflows-roundup"
+           ]
+
+    assert shapes_slugs == [
+             "refresh-order",
+             "update-tally",
+             "normalize-ticket",
+             "result-gate",
+             "shape-guide",
+             "shapes-results-roundup"
+           ]
+
+    assert workflow_slugs == [
+             "summary-module",
+             "helper-step",
+             "pipe-line",
+             "tagged-path",
+             "with-lane",
+             "workflow-report-roundup"
+           ]
   end
 
   test "codex entries are unique" do
@@ -349,7 +509,25 @@ defmodule Codie.CurriculumTest do
           "enum-reduce-lab",
           "enum-eager-lab",
           "stream-lazy-lab",
-          "enumeration-streams-roundup"
+          "enumeration-streams-roundup",
+          "filter-tray",
+          "find-cup",
+          "count-batch",
+          "all-ready",
+          "sort-board",
+          "collection-workflows-roundup",
+          "refresh-order",
+          "update-tally",
+          "normalize-ticket",
+          "result-gate",
+          "shape-guide",
+          "shapes-results-roundup",
+          "summary-module",
+          "helper-step",
+          "pipe-line",
+          "tagged-path",
+          "with-lane",
+          "workflow-report-roundup"
         ] do
       lesson = Curriculum.get_lesson!(slug)
       assert lesson.teaching_markdown =~ "Common cases:"
@@ -397,7 +575,25 @@ defmodule Codie.CurriculumTest do
           "enum-reduce-lab",
           "enum-eager-lab",
           "stream-lazy-lab",
-          "enumeration-streams-roundup"
+          "enumeration-streams-roundup",
+          "filter-tray",
+          "find-cup",
+          "count-batch",
+          "all-ready",
+          "sort-board",
+          "collection-workflows-roundup",
+          "refresh-order",
+          "update-tally",
+          "normalize-ticket",
+          "result-gate",
+          "shape-guide",
+          "shapes-results-roundup",
+          "summary-module",
+          "helper-step",
+          "pipe-line",
+          "tagged-path",
+          "with-lane",
+          "workflow-report-roundup"
         ] do
       lesson = Curriculum.get_lesson!(slug)
       assert length(lesson.quick_terms) > 0

@@ -11,7 +11,7 @@ defmodule CodieWeb.TrackMapLive do
 
   @impl true
   def handle_params(%{"track_slug" => track_slug}, _uri, socket) do
-    {:noreply, hydrate(socket, track_slug)}
+    {:noreply, route_track(socket, track_slug)}
   end
 
   @impl true
@@ -90,5 +90,18 @@ defmodule CodieWeb.TrackMapLive do
       passed_slugs: Progress.passed_lesson_slugs(profile),
       track_row: track_row || %{status: "locked", completion_percent: 0.0}
     )
+  end
+
+  defp route_track(socket, track_slug) do
+    if Curriculum.archived_track?(track_slug) do
+      socket
+      |> put_flash(
+        :info,
+        "Foundations (Legacy) is archived. Returning to the active foundations track."
+      )
+      |> push_navigate(to: ~p"/learn/foundations")
+    else
+      hydrate(socket, track_slug)
+    end
   end
 end

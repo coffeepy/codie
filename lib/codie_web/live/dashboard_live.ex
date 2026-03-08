@@ -156,7 +156,7 @@ defmodule CodieWeb.DashboardLive do
       next_lesson: snapshot.next_lesson,
       track_progress: snapshot.track_progress,
       recent_runs: snapshot.recent_runs,
-      track_titles: Map.new(Curriculum.list_tracks(), &{&1.slug, &1.title})
+      track_titles: Map.new(Curriculum.active_tracks(), &{&1.slug, &1.title})
     )
   end
 
