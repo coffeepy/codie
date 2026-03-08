@@ -115,9 +115,9 @@ defmodule CodieWeb.ProfileLive do
 
     assign(socket,
       profile: profile,
-      tracks: Progress.list_track_progress(profile),
+      tracks: Progress.list_active_track_progress(profile),
       attempts: Progress.list_lesson_progress(profile),
-      track_titles: Map.new(Curriculum.list_tracks(), &{&1.slug, &1.title})
+      track_titles: Map.new(Curriculum.active_tracks(), &{&1.slug, &1.title})
     )
   end
 

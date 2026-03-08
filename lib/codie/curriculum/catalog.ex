@@ -60,6 +60,32 @@ defmodule Codie.Curriculum.Catalog do
         teaser: "Use `Enum` daily, and use `Stream` when lazy processing matters."
       },
       %Track{
+        slug: "working-with-data-collections",
+        title: "Working with Data: Collection Workflows",
+        summary:
+          "Learn to filter, find, count, validate, and sort collections in small, practical Elixir workflows.",
+        theme: "Prep Lab",
+        estimated_lesson_count: 6,
+        teaser: "Turn plain collections into useful, checked results."
+      },
+      %Track{
+        slug: "working-with-data-shapes-results",
+        title: "Working with Data: Shapes and Results",
+        summary: "Learn to update maps, normalize messy input, and return clear tagged results.",
+        theme: "Shape Lab",
+        estimated_lesson_count: 6,
+        teaser: "Turn messy values into stable shapes with explicit outcomes."
+      },
+      %Track{
+        slug: "working-with-data-workflows",
+        title: "Working with Data: Small Workflows",
+        summary:
+          "Build small module-based workflows that transform data and return readable final results.",
+        theme: "Workflow Lab",
+        estimated_lesson_count: 6,
+        teaser: "Use modules, helpers, and `with` to build small real programs."
+      },
+      %Track{
         slug: "foundations-old",
         title: "Foundations (Legacy)",
         summary:
@@ -68,11 +94,6 @@ defmodule Codie.Curriculum.Catalog do
         estimated_lesson_count: 50,
         teaser: "Legacy material kept for reference while the new foundations track is rebuilt."
       },
-      placeholder_track(
-        "functional-fluency",
-        "Functional Fluency",
-        "Compose data transforms, recursion, comprehensions, and richer immutable workflows."
-      ),
       placeholder_track(
         "processes-and-message-passing",
         "Processes and Message Passing",
@@ -4993,6 +5014,1469 @@ defmodule Codie.Curriculum.Catalog do
             "variable-binding",
             "Variable Binding",
             "Use `=` to bind a value to a name so you can reuse it later in the file."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "working-with-data-collections",
+        slug: "filter-tray",
+        title: "Filter Tray",
+        summary: "Keep only the values that match one rule.",
+        teaching_markdown: """
+        What:
+        `Enum.filter/2` keeps only the items that pass a check.
+        Its companion `Enum.reject/2` removes the items that pass a check.
+
+        Example:
+        `Enum.filter(["latte", "tea", "mocha"], fn drink -> String.length(drink) >= 5 end)`
+        `Enum.reject(["", "latte", ""], fn drink -> drink == "" end)`
+
+        Why:
+        Filtering is one of the fastest ways to turn a noisy collection into a useful one.
+
+        Common cases:
+        Keep only long labels
+        Keep only items that passed a check
+
+        Watch out:
+        `filter` keeps matches and `reject` removes matches. This task only needs `filter`.
+
+        Task:
+        Use `Enum.filter/2` on `["latte", "tea", "mocha"]` to keep only drink names with a length of at least `5`.
+        """,
+        starter_code: """
+        ["latte", "tea", "mocha"]
+        """,
+        prerequisites: ["enumeration-streams-roundup"],
+        checks: [
+          ast_contains("Enum.filter",
+            checkpoint: "Use `Enum.filter/2`",
+            failure_message: "This lesson expects `Enum.filter/2`."
+          ),
+          source_contains("String.length",
+            checkpoint: "Measure the drink names",
+            failure_message: "Use `String.length/1` inside the filter."
+          ),
+          returns(["latte", "mocha"],
+            checkpoint: "Return `[\"latte\", \"mocha\"]`",
+            failure_message: "The final expression should evaluate to `[\"latte\", \"mocha\"]`."
+          )
+        ],
+        hints: [
+          "Use `Enum.filter(collection, fn item -> ... end)`.",
+          "Keep only the drink names where `String.length(drink) >= 5`.",
+          "If you ever need the opposite move, `Enum.reject/2` is the companion tool — but you do not need it here.",
+          "A valid result is `[\"latte\", \"mocha\"]`."
+        ],
+        quick_terms: [
+          quick_term("Filter", "`Enum.filter/2` keeps only the items that match your rule.")
+        ],
+        rewards: reward(34, 2, 4, 4, 3, 1),
+        codex_entries_unlocked: [
+          codex(
+            "working-with-data-filter",
+            "Enum.filter",
+            "Use `Enum.filter/2` when you want a smaller list that keeps only matching items."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "working-with-data-collections",
+        slug: "find-cup",
+        title: "Find Cup",
+        summary: "Find the first matching value in a collection.",
+        teaching_markdown: """
+        What:
+        `Enum.find/2` returns the first item that passes a check.
+        If nothing matches, it returns `nil`.
+
+        Example:
+        `Enum.find(["tea", "latte", "mocha"], fn drink -> String.contains?(drink, "tt") end)`
+
+        Why:
+        Real code often needs the first matching item, not every matching item.
+
+        Common cases:
+        Find the first ready item
+        Find the first label that matches a text rule
+
+        Watch out:
+        `Enum.find/2` returns the matching value itself, not `true`.
+        A no-match result is `nil`.
+
+        Task:
+        Use `Enum.find/2` on `["tea", "latte", "mocha"]` to find the first drink that contains `"tt"`.
+        """,
+        starter_code: """
+        ["tea", "latte", "mocha"]
+        """,
+        prerequisites: ["filter-tray"],
+        checks: [
+          ast_contains("Enum.find",
+            checkpoint: "Use `Enum.find/2`",
+            failure_message: "This lesson expects `Enum.find/2`."
+          ),
+          source_contains("String.contains?",
+            checkpoint: "Use `String.contains?/2` in the match rule",
+            failure_message: "Use `String.contains?/2` to check each drink."
+          ),
+          returns("latte",
+            checkpoint: "Return `\"latte\"`",
+            failure_message: "The final expression should evaluate to `\"latte\"`."
+          )
+        ],
+        hints: [
+          "Use `Enum.find(collection, fn item -> ... end)`.",
+          "Check each drink with `String.contains?(drink, \"tt\")`.",
+          "The first matching drink is `\"latte\"`."
+        ],
+        quick_terms: [
+          quick_term(
+            "First match",
+            "`Enum.find/2` returns the first value that passes the check."
+          )
+        ],
+        rewards: reward(34, 2, 4, 4, 3, 1),
+        codex_entries_unlocked: [
+          codex(
+            "working-with-data-find",
+            "Enum.find",
+            "Use `Enum.find/2` when you want the first value that matches a rule."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "working-with-data-collections",
+        slug: "count-batch",
+        title: "Count Batch",
+        summary: "Count how many items made it through an earlier collection step.",
+        teaching_markdown: """
+        What:
+        `Enum.count/1` returns how many items are in a collection.
+
+        Example:
+        `ready = Enum.filter([1, 2, 3, 4], fn cups -> cups >= 3 end)`
+        `Enum.count(ready)`
+
+        Why:
+        After you filter or clean a list, counting tells you how much work is left.
+
+        Common cases:
+        Count how many items passed a filter
+        Count how many items remain after cleanup
+
+        Watch out:
+        `Enum.count/1` returns an integer.
+
+        Task:
+        `large_cups` is already filtered for you.
+        Use `Enum.count/1` to count `large_cups` and return the integer.
+        """,
+        starter_code: """
+        large_cups = Enum.filter([1, 2, 3, 4, 5], fn cups -> cups >= 3 end)
+        large_cups
+        """,
+        prerequisites: ["find-cup"],
+        checks: [
+          ast_contains("Enum.count",
+            checkpoint: "Use `Enum.count/1`",
+            failure_message: "This lesson expects `Enum.count/1`."
+          ),
+          returns(3,
+            checkpoint: "Return `3`",
+            failure_message: "The final expression should evaluate to `3`."
+          )
+        ],
+        hints: [
+          "Use `Enum.count(collection)`.",
+          "Count `large_cups`, not the original list from the filter expression.",
+          "The filtered list has three values left: `3`, `4`, and `5`."
+        ],
+        quick_terms: [
+          quick_term("Count", "`Enum.count/1` tells you how many items are in a collection.")
+        ],
+        rewards: reward(34, 2, 4, 4, 3, 1),
+        codex_entries_unlocked: [
+          codex(
+            "working-with-data-count",
+            "Enum.count",
+            "Use `Enum.count/1` when you need the size of the list you already built."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "working-with-data-collections",
+        slug: "all-ready",
+        title: "All Ready?",
+        summary: "Check whether every item passes one rule.",
+        teaching_markdown: """
+        What:
+        `Enum.all?/2` checks whether every item in a collection passes the same test.
+
+        Example:
+        `Enum.all?([%{ready: true}, %{ready: true}], fn order -> order.ready end)`
+
+        Why:
+        This is a simple, practical way to answer “did every item pass?”
+
+        Common cases:
+        Check whether every order is ready
+        Confirm every item passed the same validation rule
+
+        Watch out:
+        `Enum.all?/2` returns a boolean, not the original items.
+
+        Task:
+        Start with `orders = [%{label: "latte", ready: true}, %{label: "mocha", ready: true}]`.
+        Use `Enum.all?/2` to check whether every order is ready.
+        """,
+        starter_code: """
+        orders = [%{label: "latte", ready: true}, %{label: "mocha", ready: true}]
+        orders
+        """,
+        prerequisites: ["count-batch"],
+        checks: [
+          ast_contains("Enum.all?",
+            checkpoint: "Use `Enum.all?/2`",
+            failure_message: "This lesson expects `Enum.all?/2`."
+          ),
+          source_contains(".ready",
+            checkpoint: "Check the `:ready` field",
+            failure_message: "Use the `:ready` field inside the `Enum.all?/2` check."
+          ),
+          returns(true,
+            checkpoint: "Return `true`",
+            failure_message: "The final expression should evaluate to `true`."
+          )
+        ],
+        hints: [
+          "Use `Enum.all?(orders, fn order -> ... end)`.",
+          "Return the `ready` field from each order inside the function.",
+          "Both orders in the starter list are ready, so the result should be `true`."
+        ],
+        quick_terms: [
+          quick_term(
+            "Validate all",
+            "`Enum.all?/2` answers whether every item passes the same rule."
+          )
+        ],
+        rewards: reward(34, 2, 4, 4, 3, 1),
+        codex_entries_unlocked: [
+          codex(
+            "working-with-data-all",
+            "Enum.all?",
+            "Use `Enum.all?/2` when every item in a collection must satisfy the same rule."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "working-with-data-collections",
+        slug: "sort-board",
+        title: "Sort Board",
+        summary: "Put simple values and small maps into a stable order.",
+        teaching_markdown: """
+        What:
+        `Enum.sort/1` orders simple values.
+        `Enum.sort_by/2` orders richer data like maps by one field.
+
+        Example:
+        `Enum.sort([4, 1, 3, 2])`
+        `Enum.sort_by([%{label: "mocha"}, %{label: "latte"}], & &1.label)`
+
+        Why:
+        A stable order makes collection results easier to read and easier to return.
+
+        Common cases:
+        Sort simple values first
+        Sort small maps by one field before returning them
+
+        Watch out:
+        `Enum.sort/1` and `Enum.sort_by/2` both return new lists.
+
+        Task:
+        Start with:
+        - `numbers = [4, 1, 3, 2]`
+        - `orders = [%{label: "mocha"}, %{label: "latte"}, %{label: "americano"}]`
+
+        Sort the numbers with `Enum.sort/1`.
+        Then sort the orders by `:label` with `Enum.sort_by/2`.
+        Return only the sorted labels from the orders.
+        """,
+        starter_code: """
+        numbers = [4, 1, 3, 2]
+        orders = [%{label: "mocha"}, %{label: "latte"}, %{label: "americano"}]
+        orders
+        """,
+        prerequisites: ["all-ready"],
+        checks: [
+          ast_contains("Enum.sort",
+            checkpoint: "Use `Enum.sort/1`",
+            failure_message: "Use `Enum.sort/1` on the simple values first."
+          ),
+          ast_contains("Enum.sort_by",
+            checkpoint: "Use `Enum.sort_by/2`",
+            failure_message: "Use `Enum.sort_by/2` to sort the orders by label."
+          ),
+          returns(["americano", "latte", "mocha"],
+            checkpoint: "Return the sorted labels",
+            failure_message:
+              "The final expression should evaluate to `[\"americano\", \"latte\", \"mocha\"]`."
+          )
+        ],
+        hints: [
+          "Bind the result of `Enum.sort(numbers)` even though the final line returns the order labels.",
+          "Use `Enum.sort_by(orders, & &1.label)`.",
+          "You can inspect intermediate values with `dbg/1` while you work, but it is optional in this lesson.",
+          "Return the labels with `Enum.map(sorted, & &1.label)` on the final line."
+        ],
+        quick_terms: [
+          quick_term(
+            "Sort key",
+            "`Enum.sort_by/2` sorts richer data by one field or computed value."
+          )
+        ],
+        rewards: reward(38, 2, 5, 5, 3, 1),
+        codex_entries_unlocked: [
+          codex(
+            "working-with-data-sort",
+            "Enum.sort and Enum.sort_by",
+            "Use `Enum.sort/1` for simple values and `Enum.sort_by/2` when you need one field to define the order."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "working-with-data-collections",
+        slug: "collection-workflows-roundup",
+        title: "Collection Workflows Roundup",
+        tier: :boss,
+        summary: "Clean, sort, count, and validate a small list in one practical workflow.",
+        teaching_markdown: """
+        What:
+        This checkpoint combines the everyday collection moves from the track into one practical summary function.
+
+        Example:
+        `items |> Enum.filter(...) |> Enum.sort_by(...)`
+
+        Why:
+        Small programs often need to clean a collection, keep the useful items, and return a compact summary.
+
+        Common cases:
+        Remove blank or unusable rows before processing
+        Return a stable summary of the useful items
+
+        Watch out:
+        Build the workflow step by step so each intermediate result has one clear job.
+
+        Task:
+        Define `CodiePlayground.Collections.summary/1`.
+        For a list of item maps:
+        - keep only items where `name != ""` and `ready` is `true`
+        - sort the remaining items by `name`
+        - count the remaining items
+        - check whether every remaining item is ready
+        - return `%{count: count, valid?: valid?, items: sorted}`
+
+        Final expression should call `summary/1` with:
+        `[%{name: "mocha", ready: true}, %{name: "", ready: true}, %{name: "latte", ready: true}, %{name: "tea", ready: false}]`
+        and return `%{count: 2, valid?: true, items: [%{name: "latte", ready: true}, %{name: "mocha", ready: true}]}`.
+        """,
+        starter_code: """
+        defmodule CodiePlayground.Collections do
+          def summary(_items), do: %{count: 0, valid?: false, items: []}
+        end
+
+        CodiePlayground.Collections.summary([])
+        """,
+        prerequisites: ["sort-board"],
+        checks: [
+          ast_contains("Enum.filter",
+            checkpoint: "Keep only the valid items",
+            failure_message: "Use `Enum.filter/2` to keep only named ready items."
+          ),
+          ast_contains("Enum.sort_by",
+            checkpoint: "Sort the remaining items by name",
+            failure_message: "Use `Enum.sort_by/2` before building the summary."
+          ),
+          ast_contains("Enum.count",
+            checkpoint: "Count the remaining orders",
+            failure_message: "Use `Enum.count/1` for the summary count."
+          ),
+          ast_contains("Enum.all?",
+            checkpoint: "Validate the remaining items with `Enum.all?/2`",
+            failure_message: "Use `Enum.all?/2` for `valid?`."
+          ),
+          module_function(
+            CodiePlayground.Collections,
+            :summary,
+            [
+              [
+                %{name: "mocha", ready: true},
+                %{name: "", ready: true},
+                %{name: "latte", ready: true},
+                %{name: "tea", ready: false}
+              ]
+            ],
+            %{
+              count: 2,
+              valid?: true,
+              items: [%{name: "latte", ready: true}, %{name: "mocha", ready: true}]
+            },
+            checkpoint: "`summary/1` should return the collection report",
+            failure_message:
+              "`CodiePlayground.Collections.summary/1` should return `%{count: 2, valid?: true, items: [%{name: \"latte\", ready: true}, %{name: \"mocha\", ready: true}]}` for the sample data."
+          ),
+          returns(
+            %{
+              count: 2,
+              valid?: true,
+              items: [%{name: "latte", ready: true}, %{name: "mocha", ready: true}]
+            },
+            checkpoint: "Return the collection report from the final call",
+            failure_message:
+              "The final expression should evaluate to `%{count: 2, valid?: true, items: [%{name: \"latte\", ready: true}, %{name: \"mocha\", ready: true}]}`."
+          )
+        ],
+        hints: [
+          "Build a smaller list at each step instead of doing everything at once.",
+          "A single `Enum.filter/2` can both remove blank names and keep only ready items.",
+          "`Enum.reject/2` is also fine for cleanup if you want to split the steps, but it is optional.",
+          "The summary should be a map with `:count`, `:valid?`, and `:items`."
+        ],
+        quick_terms: [
+          quick_term(
+            "Workflow summary",
+            "A workflow summary is a compact final result that gathers the outputs a caller needs."
+          )
+        ],
+        rewards: reward(56, 2, 6, 6, 5, 2),
+        codex_entries_unlocked: [
+          codex(
+            "working-with-data-collections-roundup",
+            "Collection Workflows Roundup",
+            "A practical collection workflow usually means removing invalid items, keeping the useful ones, sorting them, and returning a compact summary."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "working-with-data-shapes-results",
+        slug: "refresh-order",
+        title: "Refresh Order",
+        summary: "Update one known field on a map without rebuilding the whole thing.",
+        teaching_markdown: """
+        What:
+        `%{map | key: value}` updates an existing key and returns a new map.
+
+        Example:
+        `order = %{drink: "latte", status: :draft}`
+        `%{order | status: :ready}`
+
+        Why:
+        This is a compact, common way to update a known key on a map or struct.
+
+        Common cases:
+        Mark one order as ready
+        Change one known field while keeping the rest of the map the same
+
+        Watch out:
+        Map update syntax expects the key to already exist.
+
+        Task:
+        Keep `order = %{drink: "latte", status: :draft}`,
+        update `:status` to `:ready`, and return the updated map.
+        """,
+        starter_code: """
+        order = %{drink: "latte", status: :draft}
+        order
+        """,
+        prerequisites: ["collection-workflows-roundup"],
+        checks: [
+          binds(:order, %{drink: "latte", status: :draft},
+            checkpoint: "Keep the starting map binding",
+            failure_message: "Bind `order` as `%{drink: \"latte\", status: :draft}`."
+          ),
+          source_contains("| status: :ready",
+            checkpoint: "Use map update syntax",
+            failure_message: "Use `%{order | status: :ready}` to update the map."
+          ),
+          returns(%{drink: "latte", status: :ready},
+            checkpoint: "Return the updated map",
+            failure_message:
+              "The final expression should evaluate to `%{drink: \"latte\", status: :ready}`."
+          )
+        ],
+        hints: [
+          "Keep the base map the same and update only `:status`.",
+          "Use `%{order | status: :ready}` on the final line.",
+          "The updated map should still keep `drink: \"latte\"`."
+        ],
+        quick_terms: [
+          quick_term(
+            "Map update syntax",
+            "`%{map | key: value}` updates one existing key and returns a new map."
+          )
+        ],
+        rewards: reward(34, 2, 4, 4, 3, 1),
+        codex_entries_unlocked: [
+          codex(
+            "working-with-data-refresh-order",
+            "Map Update Syntax",
+            "Use `%{map | key: value}` when the key already exists and you want a concise immutable update."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "working-with-data-shapes-results",
+        slug: "update-tally",
+        title: "Update Tally",
+        summary: "Adjust one map field with `Map.update/4`.",
+        teaching_markdown: """
+        What:
+        `Map.update/4` updates a key by running a function on the current value, or uses a default when the key is missing.
+
+        Example:
+        `Map.update(%{served: 2}, :served, 1, &(&1 + 1))`
+
+        Why:
+        This is a practical tool when the new value depends on the old value.
+
+        Common cases:
+        Increment a counter
+        Adjust a tally while keeping the rest of the map the same
+
+        Watch out:
+        The update function runs on the current value, so write the new rule inside the function.
+
+        Task:
+        Start from `tally = %{served: 2, queued: 1}`,
+        use `Map.update/4` to increase `:served` by `1`, and return the updated map.
+        """,
+        starter_code: """
+        tally = %{served: 2, queued: 1}
+        tally
+        """,
+        prerequisites: ["refresh-order"],
+        checks: [
+          ast_contains("Map.update",
+            checkpoint: "Use `Map.update/4`",
+            failure_message: "This lesson expects `Map.update/4`."
+          ),
+          returns(%{served: 3, queued: 1},
+            checkpoint: "Return the updated map",
+            failure_message: "The final expression should evaluate to `%{served: 3, queued: 1}`."
+          )
+        ],
+        hints: [
+          "Call `Map.update(tally, :served, 1, fn served -> ... end)`.",
+          "Inside the update function, increase the current `served` value by `1`.",
+          "The final map should still keep `queued: 1`."
+        ],
+        quick_terms: [
+          quick_term(
+            "Update function",
+            "`Map.update/4` lets the next value depend on the current one."
+          )
+        ],
+        rewards: reward(34, 2, 4, 4, 3, 1),
+        codex_entries_unlocked: [
+          codex(
+            "working-with-data-update-tally",
+            "Map.update",
+            "Use `Map.update/4` when the next value depends on the current one."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "working-with-data-shapes-results",
+        slug: "normalize-ticket",
+        title: "Normalize Ticket",
+        summary: "Turn loose input into one predictable ticket map.",
+        teaching_markdown: """
+        What:
+        A normalizer takes messy input and turns it into one predictable data shape.
+
+        Example:
+        `clean = String.trim(" latte , 2 ")`
+        `parts = String.split(clean, ",")`
+
+        Why:
+        Small Elixir programs become easier to write when the input shape becomes stable early.
+
+        Common cases:
+        Clean user input before using it
+        Build one predictable map from messy text
+
+        Watch out:
+        Trim the pieces after you split so each part is clean before you parse it.
+
+        Task:
+        Start from `" latte , 2 "`, trim it, split it on `","`, trim each piece, parse the cups, and return `%{drink: "latte", cups: 2}`.
+        """,
+        starter_code: """
+        " latte , 2 "
+        """,
+        prerequisites: ["update-tally"],
+        checks: [
+          source_contains("String.trim",
+            checkpoint: "Trim the input",
+            failure_message: "Use `String.trim/1` while cleaning the input."
+          ),
+          source_contains("String.split",
+            checkpoint: "Split the cleaned input",
+            failure_message: "Use `String.split/2` to break the input into pieces."
+          ),
+          source_contains("Integer.parse",
+            checkpoint: "Parse the cups value",
+            failure_message: "Use `Integer.parse/1` for the cups text."
+          ),
+          returns(%{drink: "latte", cups: 2},
+            checkpoint: "Return the normalized map",
+            failure_message:
+              "The final expression should evaluate to `%{drink: \"latte\", cups: 2}`."
+          )
+        ],
+        hints: [
+          "Trim the full string once, then split it into two pieces.",
+          "Trim the `drink` text and the `cups` text separately after splitting.",
+          "`Integer.parse/1` returns `{value, rest}` when parsing works."
+        ],
+        quick_terms: [
+          quick_term(
+            "Normalize",
+            "Normalize means turning messy input into one predictable shape early."
+          )
+        ],
+        rewards: reward(38, 2, 5, 5, 3, 1),
+        codex_entries_unlocked: [
+          codex(
+            "working-with-data-normalize-ticket",
+            "Normalization",
+            "Normalize messy input early so the rest of the program can rely on one predictable shape."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "working-with-data-shapes-results",
+        slug: "result-gate",
+        title: "Result Gate",
+        summary: "Return explicit success and failure shapes from one small check.",
+        teaching_markdown: """
+        What:
+        Tagged results like `{:ok, value}` and `{:error, reason}` make success and failure explicit.
+
+        Example:
+        `{:ok, "latte"}`
+        `{:error, :blank}`
+
+        Why:
+        Clear result shapes make later workflows easier to read and easier to combine.
+
+        Common cases:
+        Return a cleaned value when input is valid
+        Return a clear reason when input is unusable
+
+        Watch out:
+        The first tuple item is the tag that tells the caller how to read the rest.
+
+        Task:
+        Define `CodiePlayground.ResultGate.check/1`.
+        If the trimmed input is empty, return `{:error, :blank}`.
+        Otherwise return `{:ok, trimmed_value}`.
+        Make the final expression call `check("   ")`.
+        """,
+        starter_code: """
+        defmodule CodiePlayground.ResultGate do
+          def check(_raw), do: {:error, :todo}
+        end
+
+        CodiePlayground.ResultGate.check("")
+        """,
+        prerequisites: ["normalize-ticket"],
+        checks: [
+          source_contains("{:ok,",
+            checkpoint: "Return a success tuple",
+            failure_message: "Return `{:ok, value}` when the input is usable."
+          ),
+          source_contains("{:error, :blank}",
+            checkpoint: "Return the blank error tuple",
+            failure_message: "Return `{:error, :blank}` for blank input."
+          ),
+          module_function(CodiePlayground.ResultGate, :check, [" latte "], {:ok, "latte"},
+            checkpoint: "`check/1` should return the cleaned success tuple",
+            failure_message:
+              "`CodiePlayground.ResultGate.check(\" latte \")` should return `{:ok, \"latte\"}`."
+          ),
+          module_function(CodiePlayground.ResultGate, :check, ["   "], {:error, :blank},
+            checkpoint: "`check/1` should return the blank error tuple",
+            failure_message:
+              "`CodiePlayground.ResultGate.check(\"   \")` should return `{:error, :blank}`."
+          ),
+          returns({:error, :blank},
+            checkpoint: "Return the error tuple from the final call",
+            failure_message: "The final expression should evaluate to `{:error, :blank}`."
+          )
+        ],
+        hints: [
+          "Trim the input first and store the cleaned value in a variable.",
+          "Use `if cleaned == \"\"` for the blank check.",
+          "Return `{:ok, cleaned}` when the input is usable."
+        ],
+        quick_terms: [
+          quick_term(
+            "Tagged result",
+            "A tagged result uses a leading tag like `:ok` or `:error` to explain the value."
+          )
+        ],
+        rewards: reward(38, 2, 4, 5, 4, 1),
+        codex_entries_unlocked: [
+          codex(
+            "working-with-data-result-gate",
+            "Tagged Results",
+            "Use `{:ok, value}` and `{:error, reason}` when you want explicit, readable result shapes."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "working-with-data-shapes-results",
+        slug: "shape-guide",
+        title: "Shape Guide",
+        summary: "Use a short rule of thumb to choose between a map, keyword list, or struct.",
+        teaching_markdown: """
+        What:
+        Maps, keyword lists, and structs solve different jobs, so a few clear rules of thumb go a long way.
+
+        Example:
+        `general data -> :map`
+        `simple options -> :keyword`
+        `known fixed fields -> :struct`
+
+        Why:
+        Beginners do not need deep architecture theory yet, but they do benefit from a simple starting guide.
+
+        Common cases:
+        Reach for a map for general data
+        Reach for a keyword list for simple options
+        Reach for a struct when the fields are known ahead of time
+
+        Watch out:
+        This lesson is about picking a shape, not building the full data structure yet.
+
+        Task:
+        Pick the best shape for these scenarios, in this order:
+        - general order data -> `:map`
+        - simple function options -> `:keyword`
+        - known fixed user fields -> `:struct`
+
+        Return the final tuple `{general_shape, options_shape, user_shape}`.
+        """,
+        starter_code: """
+        general_shape = :todo
+        options_shape = :todo
+        user_shape = :todo
+        {general_shape, options_shape, user_shape}
+        """,
+        prerequisites: ["result-gate"],
+        checks: [
+          binds(:general_shape, :map,
+            checkpoint: "Choose `:map` for general order data",
+            failure_message: "Set `general_shape` to `:map`."
+          ),
+          binds(:options_shape, :keyword,
+            checkpoint: "Choose `:keyword` for simple options",
+            failure_message: "Set `options_shape` to `:keyword`."
+          ),
+          binds(:user_shape, :struct,
+            checkpoint: "Choose `:struct` for known fixed fields",
+            failure_message: "Set `user_shape` to `:struct`."
+          ),
+          returns({:map, :keyword, :struct},
+            checkpoint: "Return the shape tuple",
+            failure_message:
+              "The final expression should evaluate to `{:map, :keyword, :struct}`."
+          )
+        ],
+        hints: [
+          "Use one atom per scenario, not strings.",
+          "Maps fit general data, keyword lists fit simple options, and structs fit known fixed fields.",
+          "Return the final tuple in the same order as the task description."
+        ],
+        quick_terms: [
+          quick_term(
+            "Rule of thumb",
+            "A rule of thumb is a simple guide you can use before you know every edge case."
+          )
+        ],
+        rewards: reward(34, 2, 4, 4, 3, 1),
+        codex_entries_unlocked: [
+          codex(
+            "working-with-data-shape-guide",
+            "Shape Guide",
+            "A simple rule of thumb: general data fits maps, simple options fit keyword lists, and known fixed fields fit structs."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "working-with-data-shapes-results",
+        slug: "shapes-results-roundup",
+        title: "Shapes and Results Roundup",
+        tier: :boss,
+        summary: "Normalize messy input and return an honest tagged result.",
+        teaching_markdown: """
+        What:
+        This checkpoint combines data shaping and tagged results in one small intake function.
+
+        Example:
+        `{:ok, %{drink: "latte", cups: 2, status: :ready}}`
+        `{:error, :invalid}`
+
+        Why:
+        A lot of practical Elixir code takes messy input and turns it into a clean success or failure result.
+
+        Common cases:
+        Normalize one small line of input
+        Return an explicit success or failure shape
+
+        Watch out:
+        Keep the output contract honest: return a clean map on success and a tagged error on failure.
+
+        Task:
+        Define `CodiePlayground.Intake.normalize/1`.
+        - input like `" latte , 2 "` should become `{:ok, %{drink: "latte", cups: 2, status: :ready}}`
+        - invalid input should become `{:error, :invalid}`
+        - build one map, then update it before returning the success result
+
+        Final expression should call `normalize(" latte , 2 ")`.
+        """,
+        starter_code: """
+        defmodule CodiePlayground.Intake do
+          def normalize(_raw), do: {:error, :todo}
+        end
+
+        CodiePlayground.Intake.normalize("")
+        """,
+        prerequisites: ["shape-guide"],
+        checks: [
+          source_contains("String.trim",
+            checkpoint: "Trim the raw input",
+            failure_message: "Use `String.trim/1` while cleaning the input."
+          ),
+          source_contains("String.split",
+            checkpoint: "Split the cleaned input",
+            failure_message: "Use `String.split/2` to separate the drink and cups text."
+          ),
+          source_contains("Integer.parse",
+            checkpoint: "Parse the cups text",
+            failure_message: "Use `Integer.parse/1` for the cups value."
+          ),
+          source_contains("{:ok,",
+            checkpoint: "Return a tagged success tuple",
+            failure_message: "Return `{:ok, map}` for valid input."
+          ),
+          source_contains("{:error, :invalid}",
+            checkpoint: "Return the invalid error tuple",
+            failure_message: "Return `{:error, :invalid}` for invalid input."
+          ),
+          source_contains("| status: :ready",
+            checkpoint: "Update the normalized map before returning it",
+            failure_message:
+              "Use map update syntax to set `status: :ready` on the normalized map."
+          ),
+          module_function(
+            CodiePlayground.Intake,
+            :normalize,
+            [" latte , 2 "],
+            {:ok, %{drink: "latte", cups: 2, status: :ready}},
+            checkpoint: "`normalize/1` should return the normalized success tuple",
+            failure_message:
+              "`CodiePlayground.Intake.normalize(\" latte , 2 \")` should return `{:ok, %{drink: \"latte\", cups: 2, status: :ready}}`."
+          ),
+          module_function(CodiePlayground.Intake, :normalize, [" latte "], {:error, :invalid},
+            checkpoint: "`normalize/1` should return the invalid error tuple",
+            failure_message:
+              "`CodiePlayground.Intake.normalize(\" latte \")` should return `{:error, :invalid}`."
+          ),
+          returns({:ok, %{drink: "latte", cups: 2, status: :ready}},
+            checkpoint: "Return the success tuple from the final call",
+            failure_message:
+              "The final expression should evaluate to `{:ok, %{drink: \"latte\", cups: 2, status: :ready}}`."
+          )
+        ],
+        hints: [
+          "Use a `case` on the split result so you can reject the wrong shape.",
+          "Use a second `case` on `Integer.parse/1`.",
+          "Build one ticket map, then use map update syntax to set `status: :ready` before returning `{:ok, ticket}`."
+        ],
+        quick_terms: [
+          quick_term(
+            "Intake",
+            "An intake step turns raw input into a clean success value or an honest error."
+          )
+        ],
+        rewards: reward(58, 2, 6, 6, 5, 2),
+        codex_entries_unlocked: [
+          codex(
+            "working-with-data-shapes-roundup",
+            "Shapes and Results Roundup",
+            "A small intake function often needs to normalize text, build a clean map, and return an explicit tagged result."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "working-with-data-workflows",
+        slug: "summary-module",
+        title: "Summary Module",
+        summary: "Wrap one practical summary workflow in a clean public module function.",
+        teaching_markdown: """
+        What:
+        A small Elixir module often starts with one public function that wraps a useful workflow.
+
+        Example:
+        `def summary(orders), do: %{count: Enum.count(orders), items: orders}`
+
+        Why:
+        Naming the workflow behind one public function makes it easier to call, test, and read.
+
+        Common cases:
+        Put one collection workflow behind one public function
+        Return one small summary map a caller can inspect
+
+        Watch out:
+        Keep the input already-shaped and keep the final report small and obvious.
+
+        Task:
+        Define `CodiePlayground.OrderSummary.summary/1`.
+        It should take a list of order maps, keep only ready orders with nonblank drink names,
+        sort the cleaned drink names, and return `%{count: count, items: items, valid?: true}`.
+        Make the final expression call `summary/1` with:
+        `[%{drink: " mocha ", ready: true}, %{drink: "tea", ready: false}, %{drink: "latte", ready: true}, %{drink: "", ready: true}]`.
+        """,
+        starter_code: """
+        defmodule CodiePlayground.OrderSummary do
+          def summary(_orders), do: %{count: 0, items: [], valid?: false}
+        end
+
+        CodiePlayground.OrderSummary.summary([])
+        """,
+        prerequisites: ["shapes-results-roundup"],
+        checks: [
+          source_contains("defmodule CodiePlayground.OrderSummary"),
+          source_contains("def summary("),
+          module_function(
+            CodiePlayground.OrderSummary,
+            :summary,
+            [
+              [
+                %{drink: " mocha ", ready: true},
+                %{drink: "tea", ready: false},
+                %{drink: "latte", ready: true},
+                %{drink: "", ready: true}
+              ]
+            ],
+            %{count: 2, items: ["latte", "mocha"], valid?: true},
+            checkpoint: "`summary/1` should return the summary map",
+            failure_message:
+              "`CodiePlayground.OrderSummary.summary([...])` should return `%{count: 2, items: [\"latte\", \"mocha\"], valid?: true}`."
+          ),
+          returns(%{count: 2, items: ["latte", "mocha"], valid?: true},
+            checkpoint: "Return the summary map from the final call",
+            failure_message:
+              "The final expression should evaluate to `%{count: 2, items: [\"latte\", \"mocha\"], valid?: true}`."
+          )
+        ],
+        hints: [
+          "Filter the list down to ready orders first.",
+          "Trim each drink name, then remove blank names before sorting.",
+          "Return `%{count: ..., items: ..., valid?: true}` from `summary/1`."
+        ],
+        quick_terms: [
+          quick_term(
+            "Public function",
+            "A public function is the named entry point other code calls to use your module."
+          )
+        ],
+        rewards: reward(36, 2, 4, 4, 3, 1),
+        codex_entries_unlocked: [
+          codex(
+            "working-with-data-summary-module",
+            "Summary Modules",
+            "A small Elixir module often starts with one clear public function that wraps a practical workflow."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "working-with-data-workflows",
+        slug: "helper-step",
+        title: "Helper Step",
+        summary: "Move one cleanup step into a helper while keeping the same summary story.",
+        teaching_markdown: """
+        What:
+        A helper lets you name one repeated or noisy step without changing the main story of the module.
+
+        Example:
+        `def summary(orders), do: ... clean_drink(drink) ...`
+        `defp clean_drink(drink), do: String.trim(drink)`
+
+        Why:
+        Pulling one cleanup step into a helper can make the public function easier to scan.
+
+        Common cases:
+        Name one cleanup step so the public function reads more clearly
+        Keep the same result shape while reducing noise in the main function
+
+        Watch out:
+        Keep the helper focused on one job instead of moving the whole workflow out of `summary/1`.
+
+        Task:
+        Define `CodiePlayground.OrderSummary.summary/1` with the same summary-map result as the previous lesson,
+        but add a private helper `clean_drink/1` for the drink-name cleanup step.
+        Keep the final result shape `%{count: count, items: items, valid?: true}`.
+        Make the final expression call `summary/1` with the same order list from the lesson story.
+        """,
+        starter_code: """
+        defmodule CodiePlayground.OrderSummary do
+          def summary(_orders), do: %{count: 0, items: [], valid?: false}
+        end
+
+        CodiePlayground.OrderSummary.summary([])
+        """,
+        prerequisites: ["summary-module"],
+        checks: [
+          source_contains("def summary("),
+          source_contains("defp clean_drink("),
+          module_function(
+            CodiePlayground.OrderSummary,
+            :summary,
+            [
+              [
+                %{drink: " mocha ", ready: true},
+                %{drink: "tea", ready: false},
+                %{drink: "latte", ready: true},
+                %{drink: "", ready: true}
+              ]
+            ],
+            %{count: 2, items: ["latte", "mocha"], valid?: true},
+            checkpoint: "`summary/1` should keep the same summary map",
+            failure_message:
+              "`CodiePlayground.OrderSummary.summary([...])` should still return `%{count: 2, items: [\"latte\", \"mocha\"], valid?: true}`."
+          ),
+          returns(%{count: 2, items: ["latte", "mocha"], valid?: true},
+            checkpoint: "Return the summary map from the final call",
+            failure_message:
+              "The final expression should evaluate to `%{count: 2, items: [\"latte\", \"mocha\"], valid?: true}`."
+          )
+        ],
+        hints: [
+          "Keep `summary/1` as the public entry point.",
+          "Use `clean_drink/1` only for trimming the drink name.",
+          "Return the same `%{count: ..., items: ..., valid?: true}` shape as before."
+        ],
+        quick_terms: [
+          quick_term(
+            "Helper",
+            "A helper is a small supporting function that keeps the main function easier to read."
+          )
+        ],
+        rewards: reward(36, 2, 4, 4, 3, 1),
+        codex_entries_unlocked: [
+          codex(
+            "working-with-data-helper-step",
+            "Helper Steps",
+            "A small helper is useful when one cleanup step makes the public workflow noisy."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "working-with-data-workflows",
+        slug: "pipe-line",
+        title: "Pipe Line",
+        summary: "Rewrite a multi-step transform into one readable pipeline.",
+        teaching_markdown: """
+        What:
+        A pipeline shows a few one-argument transforms from top to bottom.
+
+        Example:
+        `raw |> Enum.map(&String.trim/1) |> Enum.reject(&(&1 == ""))`
+
+        Why:
+        Pipelines make small data transforms easier to read in order.
+
+        Common cases:
+        Clean text values in a few visible steps
+        Keep the data flow readable from top to bottom
+
+        Watch out:
+        Pipes work best when each step accepts the previous value as its first argument.
+
+        Task:
+        Define `CodiePlayground.PipeLine.labels/1`.
+        Use a pipeline to trim each drink name, remove blanks, upcase the remaining names,
+        sort the final list, and return it.
+        Make the final expression call `labels([" mocha ", " ", "latte "])`.
+        """,
+        starter_code: """
+        defmodule CodiePlayground.PipeLine do
+          def labels(_raw), do: []
+        end
+
+        CodiePlayground.PipeLine.labels([])
+        """,
+        prerequisites: ["helper-step"],
+        checks: [
+          ast_contains("|>",
+            checkpoint: "Use a pipeline",
+            failure_message: "This lesson expects a `|>` pipeline."
+          ),
+          source_contains("Enum.reject",
+            checkpoint: "Remove blank values",
+            failure_message: "Use `Enum.reject/2` to remove the blank values."
+          ),
+          module_function(
+            CodiePlayground.PipeLine,
+            :labels,
+            [[" mocha ", " ", "latte "]],
+            ["LATTE", "MOCHA"],
+            checkpoint: "`labels/1` should return the cleaned list",
+            failure_message:
+              "`CodiePlayground.PipeLine.labels([\" mocha \", \" \", \"latte \"])` should return `[\"LATTE\", \"MOCHA\"]`."
+          ),
+          returns(["LATTE", "MOCHA"],
+            checkpoint: "Return the cleaned list from the final call",
+            failure_message: "The final expression should evaluate to `[\"LATTE\", \"MOCHA\"]`."
+          )
+        ],
+        hints: [
+          "Start by piping `raw` into `Enum.map(&String.trim/1)`.",
+          "Reject blank strings before you upcase and sort the list.",
+          "Return the final list directly from `labels/1`."
+        ],
+        quick_terms: [
+          quick_term(
+            "Pipeline",
+            "A pipeline shows a small sequence of transforms in reading order."
+          )
+        ],
+        rewards: reward(36, 2, 5, 4, 3, 1),
+        codex_entries_unlocked: [
+          codex(
+            "working-with-data-pipe-line",
+            "Readable Pipelines",
+            "Use a pipeline when a few cleanup steps read better from top to bottom."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "working-with-data-workflows",
+        slug: "tagged-path",
+        title: "Tagged Path",
+        summary:
+          "Use explicit tagged-result steps across a small workflow before reaching for `with`.",
+        teaching_markdown: """
+        What:
+        Tagged results can travel through more than one step even when you write the branches out explicitly.
+
+        Example:
+        `case normalize_items(raw) do`
+        `  {:ok, items} -> ...`
+        `  {:error, reason} -> {:error, reason}`
+        `end`
+
+        Why:
+        This makes multi-step success and failure paths feel normal before `with` shortens the code.
+
+        Common cases:
+        Run one tagged cleanup step, then another tagged validation step
+        Pass an error tuple through unchanged when one step fails
+
+        Watch out:
+        Keep the success and error shapes consistent between the helpers and the public function.
+
+        Task:
+        Define `CodiePlayground.TaggedPath.summary/1`.
+        Write `normalize_items/1` to return `{:ok, items}` or `{:error, :invalid}`.
+        Write `require_batch/1` to return `{:ok, items}` when at least two items remain,
+        otherwise `{:error, :too_small}`.
+        In `summary/1`, use explicit `case` steps to return either
+        `{:ok, %{count: count, items: items, valid?: true}}` or the error tuple unchanged.
+        Make the final expression call `summary([" mocha ", " ", "latte "])`.
+        """,
+        starter_code: """
+        defmodule CodiePlayground.TaggedPath do
+          def summary(_raw), do: {:error, :todo}
+        end
+
+        CodiePlayground.TaggedPath.summary([])
+        """,
+        prerequisites: ["pipe-line"],
+        checks: [
+          ast_contains("case",
+            checkpoint: "Use explicit `case` steps",
+            failure_message: "This lesson expects explicit `case` branching instead of `with`."
+          ),
+          source_contains("{:ok,"),
+          source_contains("{:error, :too_small}"),
+          module_function(
+            CodiePlayground.TaggedPath,
+            :summary,
+            [[" mocha ", " ", "latte "]],
+            {:ok, %{count: 2, items: ["latte", "mocha"], valid?: true}},
+            checkpoint: "`summary/1` should return the tagged summary",
+            failure_message:
+              "`CodiePlayground.TaggedPath.summary([\" mocha \", \" \", \"latte \"])` should return `{:ok, %{count: 2, items: [\"latte\", \"mocha\"], valid?: true}}`."
+          ),
+          module_function(
+            CodiePlayground.TaggedPath,
+            :summary,
+            [[" latte "]],
+            {:error, :too_small},
+            checkpoint: "`summary/1` should return the small-batch error",
+            failure_message:
+              "`CodiePlayground.TaggedPath.summary([\" latte \"])` should return `{:error, :too_small}`."
+          ),
+          returns({:ok, %{count: 2, items: ["latte", "mocha"], valid?: true}},
+            checkpoint: "Return the tagged summary from the final call",
+            failure_message:
+              "The final expression should evaluate to `{:ok, %{count: 2, items: [\"latte\", \"mocha\"], valid?: true}}`."
+          )
+        ],
+        hints: [
+          "Let `normalize_items/1` clean and sort the raw values before tagging success.",
+          "Let `require_batch/1` check that at least two items remain.",
+          "In `summary/1`, keep the error tuple unchanged when either step fails."
+        ],
+        quick_terms: [
+          quick_term(
+            "Tagged flow",
+            "A tagged flow keeps returning `{:ok, value}` or `{:error, reason}` as the work moves through each step."
+          )
+        ],
+        rewards: reward(38, 2, 5, 5, 4, 1),
+        codex_entries_unlocked: [
+          codex(
+            "working-with-data-tagged-path",
+            "Tagged Paths",
+            "Before using `with`, it helps to get comfortable passing tagged results through multiple explicit steps."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "working-with-data-workflows",
+        slug: "with-lane",
+        title: "With Lane",
+        summary:
+          "Rewrite a tagged multi-step workflow with `with` once the result shapes feel familiar.",
+        teaching_markdown: """
+        What:
+        `with` keeps the happy path readable when each helper returns the tagged shapes you already know.
+
+        Example:
+        `with {:ok, items} <- normalize_items(raw),`
+        `     {:ok, items} <- require_batch(items) do`
+        `  {:ok, items}`
+        `end`
+
+        Why:
+        This is a cleaner version of the same tagged-result workflow you can already write with explicit `case` branches.
+
+        Common cases:
+        Keep a tagged happy path readable across multiple steps
+        Return the same error tuple when one helper fails
+
+        Watch out:
+        Each `<-` expects a matching shape. A non-matching value jumps to `else`.
+
+        Task:
+        Define `CodiePlayground.WithLane.summary/1`.
+        Keep the provided `normalize_items/1` and `require_batch/1` helpers.
+        Rewrite `summary/1` with `with` so it returns either
+        `{:ok, %{count: count, items: items, valid?: true}}` or the error tuple unchanged.
+        Make the final expression call `summary([" mocha ", " ", "latte "])`.
+        """,
+        starter_code: """
+        defmodule CodiePlayground.WithLane do
+          defp normalize_items(raw) do
+            items =
+              raw
+              |> Enum.map(&String.trim/1)
+              |> Enum.reject(&(&1 == ""))
+              |> Enum.sort()
+
+            if items == [] do
+              {:error, :invalid}
+            else
+              {:ok, items}
+            end
+          end
+
+          defp require_batch(items) do
+            if Enum.count(items) >= 2 do
+              {:ok, items}
+            else
+              {:error, :too_small}
+            end
+          end
+
+          def summary(_raw), do: {:error, :todo}
+        end
+
+        CodiePlayground.WithLane.summary([])
+        """,
+        prerequisites: ["tagged-path"],
+        checks: [
+          ast_contains("with",
+            checkpoint: "Use a `with` expression",
+            failure_message: "This lesson expects a `with` expression."
+          ),
+          source_contains("<-",
+            checkpoint: "Chain helper results with `<-`",
+            failure_message: "Use `<-` inside `with` to match each helper result."
+          ),
+          module_function(
+            CodiePlayground.WithLane,
+            :summary,
+            [[" mocha ", " ", "latte "]],
+            {:ok, %{count: 2, items: ["latte", "mocha"], valid?: true}},
+            checkpoint: "`summary/1` should return the tagged summary",
+            failure_message:
+              "`CodiePlayground.WithLane.summary([\" mocha \", \" \", \"latte \"])` should return `{:ok, %{count: 2, items: [\"latte\", \"mocha\"], valid?: true}}`."
+          ),
+          module_function(CodiePlayground.WithLane, :summary, [[" latte "]], {:error, :too_small},
+            checkpoint: "`summary/1` should return the small-batch error",
+            failure_message:
+              "`CodiePlayground.WithLane.summary([\" latte \"])` should return `{:error, :too_small}`."
+          ),
+          returns({:ok, %{count: 2, items: ["latte", "mocha"], valid?: true}},
+            checkpoint: "Return the tagged summary from the final call",
+            failure_message:
+              "The final expression should evaluate to `{:ok, %{count: 2, items: [\"latte\", \"mocha\"], valid?: true}}`."
+          )
+        ],
+        hints: [
+          "Keep the helpers as they are and rewrite only `summary/1`.",
+          "Match the `{:ok, items}` result from `normalize_items/1` first, then from `require_batch/1`.",
+          "Use `else` to pass the error tuple through unchanged."
+        ],
+        quick_terms: [
+          quick_term(
+            "Happy path",
+            "The happy path is the successful flow where each tagged step matches."
+          )
+        ],
+        rewards: reward(40, 2, 5, 5, 4, 1),
+        codex_entries_unlocked: [
+          codex(
+            "working-with-data-with-lane",
+            "with Workflows",
+            "Use `with` when the tagged result shapes already feel familiar and the happy path deserves a cleaner shape."
+          )
+        ]
+      ),
+      lesson(
+        track_slug: "working-with-data-workflows",
+        slug: "workflow-report-roundup",
+        title: "Workflow Report Roundup",
+        tier: :boss,
+        summary:
+          "Build one small module that normalizes input and returns a clear tagged report.",
+        teaching_markdown: """
+        What:
+        This checkpoint combines one helper, a normalization pipeline, tagged results, and `with` into one small end-to-end module.
+
+        Example:
+        `with {:ok, items} <- normalize_orders(raw) do`
+        `  {:ok, %{count: Enum.count(items), items: items, valid?: true}}`
+        `end`
+
+        Why:
+        This is the kind of small real Elixir workflow the whole wave is building toward.
+
+        Common cases:
+        Normalize raw input into one clean report shape
+        Stop early when the helper returns an error and pass it through cleanly
+
+        Watch out:
+        Keep the helper focused on normalization so the `with` block reads like the public workflow.
+
+        Task:
+        Define `CodiePlayground.WorkflowReport.summary/1`.
+        Use one private helper `normalize_orders/1` that takes a raw list of order maps,
+        keeps only ready orders with nonblank drink names, trims the names, sorts them, and returns
+        either `{:ok, items}` or `{:error, :invalid}`.
+        Then use `with` in `summary/1` to return either
+        `{:ok, %{count: count, items: items, valid?: true}}` or `{:error, :invalid}`.
+        Make the final expression call `summary/1` with:
+        `[%{drink: " mocha ", ready: true}, %{drink: "", ready: true}, %{drink: "latte", ready: true}, %{drink: "tea", ready: false}]`.
+        """,
+        starter_code: """
+        defmodule CodiePlayground.WorkflowReport do
+          def summary(_raw), do: {:error, :todo}
+        end
+
+        CodiePlayground.WorkflowReport.summary([])
+        """,
+        prerequisites: ["with-lane"],
+        checks: [
+          ast_contains("with",
+            checkpoint: "Use `with` for the main workflow",
+            failure_message: "This checkpoint expects a `with` expression in `summary/1`."
+          ),
+          ast_contains("|>",
+            checkpoint: "Use a pipeline in the helper",
+            failure_message: "Use a small `|>` pipeline while normalizing the raw order list."
+          ),
+          source_contains("<-",
+            checkpoint: "Chain helper results with `<-`",
+            failure_message: "Use `<-` to chain the helper steps."
+          ),
+          source_contains("defp normalize_orders("),
+          source_contains("{:ok, %{count:"),
+          source_contains("{:error, :invalid}"),
+          module_function(
+            CodiePlayground.WorkflowReport,
+            :summary,
+            [
+              [
+                %{drink: " mocha ", ready: true},
+                %{drink: "", ready: true},
+                %{drink: "latte", ready: true},
+                %{drink: "tea", ready: false}
+              ]
+            ],
+            {:ok, %{count: 2, items: ["latte", "mocha"], valid?: true}},
+            checkpoint: "`summary/1` should return the tagged report",
+            failure_message:
+              "`CodiePlayground.WorkflowReport.summary([...])` should return `{:ok, %{count: 2, items: [\"latte\", \"mocha\"], valid?: true}}`."
+          ),
+          module_function(
+            CodiePlayground.WorkflowReport,
+            :summary,
+            [[%{drink: "", ready: true}, %{drink: "tea", ready: false}]],
+            {:error, :invalid},
+            checkpoint: "`summary/1` should return the invalid error tuple",
+            failure_message:
+              "`CodiePlayground.WorkflowReport.summary([%{drink: \"\", ready: true}, %{drink: \"tea\", ready: false}])` should return `{:error, :invalid}`."
+          ),
+          returns({:ok, %{count: 2, items: ["latte", "mocha"], valid?: true}},
+            checkpoint: "Return the tagged report from the final call",
+            failure_message:
+              "The final expression should evaluate to `{:ok, %{count: 2, items: [\"latte\", \"mocha\"], valid?: true}}`."
+          )
+        ],
+        hints: [
+          "Let `normalize_orders/1` do the raw cleanup work and return a tagged result.",
+          "Use a pipeline inside the helper so the cleanup steps read in order.",
+          "Keep `summary/1` focused on the tagged happy path and build the final report map there."
+        ],
+        quick_terms: [
+          quick_term(
+            "End-to-end workflow",
+            "An end-to-end workflow chains a few focused helpers into one clear final result."
+          )
+        ],
+        rewards: reward(60, 2, 6, 6, 5, 2),
+        codex_entries_unlocked: [
+          codex(
+            "working-with-data-workflow-roundup",
+            "Workflow Report Roundup",
+            "A small Elixir workflow often means normalizing raw input, passing one tagged result through `with`, and returning one clear final report."
           )
         ]
       ),

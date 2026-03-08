@@ -814,6 +814,475 @@ defmodule Codie.RunnerTest do
     assert result.status == :pass
   end
 
+  test "passes the working with data filter lesson" do
+    result =
+      Runner.submit(%Submission{
+        lesson_slug: "filter-tray",
+        code: """
+        drinks = ["latte", "tea", "mocha"]
+        Enum.filter(drinks, fn drink -> String.length(drink) >= 5 end)
+        """,
+        profile_id: 1,
+        attempt_number: 1
+      })
+
+    assert result.status == :pass
+  end
+
+  test "passes the working with data find lesson" do
+    result =
+      Runner.submit(%Submission{
+        lesson_slug: "find-cup",
+        code: """
+        drinks = ["tea", "latte", "mocha"]
+        Enum.find(drinks, fn drink -> String.contains?(drink, "tt") end)
+        """,
+        profile_id: 1,
+        attempt_number: 1
+      })
+
+    assert result.status == :pass
+  end
+
+  test "passes the working with data count lesson" do
+    result =
+      Runner.submit(%Submission{
+        lesson_slug: "count-batch",
+        code: """
+        large_cups = Enum.filter([1, 2, 3, 4, 5], fn cups -> cups >= 3 end)
+        Enum.count(large_cups)
+        """,
+        profile_id: 1,
+        attempt_number: 1
+      })
+
+    assert result.status == :pass
+  end
+
+  test "passes the working with data all-ready lesson" do
+    result =
+      Runner.submit(%Submission{
+        lesson_slug: "all-ready",
+        code: """
+        orders = [%{label: "latte", ready: true}, %{label: "mocha", ready: true}]
+        Enum.all?(orders, fn order -> order.ready end)
+        """,
+        profile_id: 1,
+        attempt_number: 1
+      })
+
+    assert result.status == :pass
+  end
+
+  test "passes the working with data sort lesson" do
+    result =
+      Runner.submit(%Submission{
+        lesson_slug: "sort-board",
+        code: """
+        numbers = [4, 1, 3, 2]
+        orders = [%{label: "mocha"}, %{label: "latte"}, %{label: "americano"}]
+        sorted_numbers = Enum.sort(numbers)
+        sorted = Enum.sort_by(orders, & &1.label)
+        Enum.map(sorted, & &1.label)
+        """,
+        profile_id: 1,
+        attempt_number: 1
+      })
+
+    assert result.status == :pass
+  end
+
+  test "passes the working with data collection roundup lesson" do
+    result =
+      Runner.submit(%Submission{
+        lesson_slug: "collection-workflows-roundup",
+        code: """
+        defmodule CodiePlayground.Collections do
+          def summary(items) do
+            filtered = Enum.filter(items, fn item -> item.name != "" and item.ready end)
+            sorted = Enum.sort_by(filtered, & &1.name)
+            count = Enum.count(sorted)
+            valid? = Enum.all?(sorted, fn item -> item.ready end)
+            %{count: count, valid?: valid?, items: sorted}
+          end
+        end
+
+        CodiePlayground.Collections.summary([
+          %{name: "mocha", ready: true},
+          %{name: "", ready: true},
+          %{name: "latte", ready: true},
+          %{name: "tea", ready: false}
+        ])
+        """,
+        profile_id: 1,
+        attempt_number: 1
+      })
+
+    assert result.status == :pass
+  end
+
+  test "passes the working with data refresh order lesson" do
+    result =
+      Runner.submit(%Submission{
+        lesson_slug: "refresh-order",
+        code: """
+        order = %{drink: "latte", status: :draft}
+        %{order | status: :ready}
+        """,
+        profile_id: 1,
+        attempt_number: 1
+      })
+
+    assert result.status == :pass
+  end
+
+  test "passes the working with data update tally lesson" do
+    result =
+      Runner.submit(%Submission{
+        lesson_slug: "update-tally",
+        code: """
+        tally = %{served: 2, queued: 1}
+        Map.update(tally, :served, 1, fn served -> served + 1 end)
+        """,
+        profile_id: 1,
+        attempt_number: 1
+      })
+
+    assert result.status == :pass
+  end
+
+  test "passes the working with data normalize ticket lesson" do
+    result =
+      Runner.submit(%Submission{
+        lesson_slug: "normalize-ticket",
+        code: """
+        cleaned = String.trim(" latte , 2 ")
+        [drink_text, cups_text] = String.split(cleaned, ",")
+        drink = String.trim(drink_text)
+        {cups, ""} = Integer.parse(String.trim(cups_text))
+        %{drink: drink, cups: cups}
+        """,
+        profile_id: 1,
+        attempt_number: 1
+      })
+
+    assert result.status == :pass
+  end
+
+  test "passes the working with data result gate lesson" do
+    result =
+      Runner.submit(%Submission{
+        lesson_slug: "result-gate",
+        code: """
+        defmodule CodiePlayground.ResultGate do
+          def check(raw) do
+            cleaned = String.trim(raw)
+
+            if cleaned == "" do
+              {:error, :blank}
+            else
+              {:ok, cleaned}
+            end
+          end
+        end
+
+        CodiePlayground.ResultGate.check("   ")
+        """,
+        profile_id: 1,
+        attempt_number: 1
+      })
+
+    assert result.status == :pass
+  end
+
+  test "passes the working with data shape guide lesson" do
+    result =
+      Runner.submit(%Submission{
+        lesson_slug: "shape-guide",
+        code: """
+        general_shape = :map
+        options_shape = :keyword
+        user_shape = :struct
+        {general_shape, options_shape, user_shape}
+        """,
+        profile_id: 1,
+        attempt_number: 1
+      })
+
+    assert result.status == :pass
+  end
+
+  test "passes the working with data shapes and results roundup lesson" do
+    result =
+      Runner.submit(%Submission{
+        lesson_slug: "shapes-results-roundup",
+        code: """
+        defmodule CodiePlayground.Intake do
+          def normalize(raw) do
+            cleaned = String.trim(raw)
+
+            case String.split(cleaned, ",") do
+              [drink_text, cups_text] ->
+                drink = String.trim(drink_text)
+
+                case Integer.parse(String.trim(cups_text)) do
+                  {cups, ""} when drink != "" ->
+                    ticket = %{drink: drink, cups: cups, status: :draft}
+                    {:ok, %{ticket | status: :ready}}
+
+                  _ -> {:error, :invalid}
+                end
+
+              _ ->
+                {:error, :invalid}
+            end
+          end
+        end
+
+        CodiePlayground.Intake.normalize(" latte , 2 ")
+        """,
+        profile_id: 1,
+        attempt_number: 1
+      })
+
+    assert result.status == :pass
+  end
+
+  test "passes the working with data summary module lesson" do
+    result =
+      Runner.submit(%Submission{
+        lesson_slug: "summary-module",
+        code: """
+        defmodule CodiePlayground.OrderSummary do
+          def summary(orders) do
+            items =
+              orders
+              |> Enum.filter(fn order -> order.ready end)
+              |> Enum.map(fn order -> String.trim(order.drink) end)
+              |> Enum.reject(fn drink -> drink == "" end)
+              |> Enum.sort()
+
+            %{count: Enum.count(items), items: items, valid?: true}
+          end
+        end
+
+        CodiePlayground.OrderSummary.summary([
+          %{drink: " mocha ", ready: true},
+          %{drink: "tea", ready: false},
+          %{drink: "latte", ready: true},
+          %{drink: "", ready: true}
+        ])
+        """,
+        profile_id: 1,
+        attempt_number: 1
+      })
+
+    assert result.status == :pass
+  end
+
+  test "passes the working with data helper step lesson" do
+    result =
+      Runner.submit(%Submission{
+        lesson_slug: "helper-step",
+        code: """
+        defmodule CodiePlayground.OrderSummary do
+          def summary(orders) do
+            items =
+              orders
+              |> Enum.filter(fn order -> order.ready end)
+              |> Enum.map(fn order -> clean_drink(order.drink) end)
+              |> Enum.reject(fn drink -> drink == "" end)
+              |> Enum.sort()
+
+            %{count: Enum.count(items), items: items, valid?: true}
+          end
+
+          defp clean_drink(drink), do: String.trim(drink)
+        end
+
+        CodiePlayground.OrderSummary.summary([
+          %{drink: " mocha ", ready: true},
+          %{drink: "tea", ready: false},
+          %{drink: "latte", ready: true},
+          %{drink: "", ready: true}
+        ])
+        """,
+        profile_id: 1,
+        attempt_number: 1
+      })
+
+    assert result.status == :pass
+  end
+
+  test "passes the working with data pipe line lesson" do
+    result =
+      Runner.submit(%Submission{
+        lesson_slug: "pipe-line",
+        code: """
+        defmodule CodiePlayground.PipeLine do
+          def labels(raw) do
+            raw
+            |> Enum.map(&String.trim/1)
+            |> Enum.reject(&(&1 == ""))
+            |> Enum.map(&String.upcase/1)
+            |> Enum.sort()
+          end
+        end
+
+        CodiePlayground.PipeLine.labels([" mocha ", " ", "latte "])
+        """,
+        profile_id: 1,
+        attempt_number: 1
+      })
+
+    assert result.status == :pass
+  end
+
+  test "passes the working with data tagged path lesson" do
+    result =
+      Runner.submit(%Submission{
+        lesson_slug: "tagged-path",
+        code: """
+        defmodule CodiePlayground.TaggedPath do
+          def summary(raw) do
+            case normalize_items(raw) do
+              {:ok, items} ->
+                case require_batch(items) do
+                  {:ok, batch} ->
+                    {:ok, %{count: Enum.count(batch), items: batch, valid?: true}}
+
+                  {:error, reason} ->
+                    {:error, reason}
+                end
+
+              {:error, reason} ->
+                {:error, reason}
+            end
+          end
+
+          defp normalize_items(raw) do
+            items =
+              raw
+              |> Enum.map(&String.trim/1)
+              |> Enum.reject(&(&1 == ""))
+              |> Enum.sort()
+
+            if items == [] do
+              {:error, :invalid}
+            else
+              {:ok, items}
+            end
+          end
+
+          defp require_batch(items) do
+            if Enum.count(items) >= 2 do
+              {:ok, items}
+            else
+              {:error, :too_small}
+            end
+          end
+        end
+
+        CodiePlayground.TaggedPath.summary([" mocha ", " ", "latte "])
+        """,
+        profile_id: 1,
+        attempt_number: 1
+      })
+
+    assert result.status == :pass
+  end
+
+  test "passes the working with data with lane lesson" do
+    result =
+      Runner.submit(%Submission{
+        lesson_slug: "with-lane",
+        code: """
+        defmodule CodiePlayground.WithLane do
+          defp normalize_items(raw) do
+            items =
+              raw
+              |> Enum.map(&String.trim/1)
+              |> Enum.reject(&(&1 == ""))
+              |> Enum.sort()
+
+            if items == [] do
+              {:error, :invalid}
+            else
+              {:ok, items}
+            end
+          end
+
+          defp require_batch(items) do
+            if Enum.count(items) >= 2 do
+              {:ok, items}
+            else
+              {:error, :too_small}
+            end
+          end
+
+          def summary(raw) do
+            with {:ok, items} <- normalize_items(raw),
+                 {:ok, items} <- require_batch(items) do
+              {:ok, %{count: Enum.count(items), items: items, valid?: true}}
+            else
+              {:error, reason} -> {:error, reason}
+            end
+          end
+        end
+
+        CodiePlayground.WithLane.summary([" mocha ", " ", "latte "])
+        """,
+        profile_id: 1,
+        attempt_number: 1
+      })
+
+    assert result.status == :pass
+  end
+
+  test "passes the working with data workflow report roundup lesson" do
+    result =
+      Runner.submit(%Submission{
+        lesson_slug: "workflow-report-roundup",
+        code: """
+        defmodule CodiePlayground.WorkflowReport do
+          def summary(raw) do
+            with {:ok, items} <- normalize_orders(raw) do
+              {:ok, %{count: Enum.count(items), items: items, valid?: true}}
+            else
+              {:error, :invalid} -> {:error, :invalid}
+            end
+          end
+
+          defp normalize_orders(raw) do
+            items =
+              raw
+              |> Enum.filter(fn order -> order.ready end)
+              |> Enum.map(fn order -> String.trim(order.drink) end)
+              |> Enum.reject(&(&1 == ""))
+              |> Enum.sort()
+
+            if items == [] do
+              {:error, :invalid}
+            else
+              {:ok, items}
+            end
+          end
+        end
+
+        CodiePlayground.WorkflowReport.summary([
+          %{drink: " mocha ", ready: true},
+          %{drink: "", ready: true},
+          %{drink: "latte", ready: true},
+          %{drink: "tea", ready: false}
+        ])
+        """,
+        profile_id: 1,
+        attempt_number: 1
+      })
+
+    assert result.status == :pass
+  end
+
   test "passes the interpolation lesson" do
     result =
       Runner.submit(%Submission{
