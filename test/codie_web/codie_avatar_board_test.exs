@@ -30,7 +30,7 @@ defmodule CodieWeb.CodieAvatarBoardTest do
     assert CodieAvatarBoard.state(:hint_used).tone == "gold"
     assert CodieAvatarBoard.state(:caffeine_gain).emotion == :happily_lifting_coffee_mug
     assert CodieAvatarBoard.state(:caffeine_gain).transient?
-    assert CodieAvatarBoard.state(:lesson_passed).emotion == :joyful_grin
+    assert CodieAvatarBoard.state(:lesson_passed).emotion == :proud
     assert CodieAvatarBoard.state(:mistake_or_failed_run).sprite == "worried"
     assert CodieAvatarBoard.state(:low_caffeine).frame == {7, 2}
     assert CodieAvatarBoard.state(:low_caffeine).tone == "violet"

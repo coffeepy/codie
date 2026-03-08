@@ -64,7 +64,7 @@ defmodule CodieWeb.CodieAvatarBoard do
     fatigue_building: :bored,
     hint_used: :curious,
     caffeine_gain: :happily_lifting_coffee_mug,
-    lesson_passed: :joyful_grin,
+    lesson_passed: :proud,
     mistake_or_failed_run: :worried,
     low_caffeine: :sleepy_yawning,
     low_energy_or_low_mood: :tired
